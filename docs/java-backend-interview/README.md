@@ -48,7 +48,7 @@
 
 ## 3. 当前阶段：文档安全编码与 Redis 并发控制
 
-<badge>当前整理中</badge>
+**当前整理中**
 
 入口文档：[文档安全编码生成与 Redis 并发控制](./01-document-code-generation-and-redis-concurrency.md)
 
