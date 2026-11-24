@@ -91,9 +91,9 @@
 | [MCP 官方架构](https://modelcontextprotocol.io/docs/learn/architecture) | Host、Client、Server 和能力模型 |
 | [Spring AI MCP Server Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-server-boot-starter-docs.html) | Spring Boot MCP Server 的 Starter、传输与安全 |
 | [Spring AI MCP Server Annotations](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-annotations-server.html) | @McpTool、@McpResource 等注解 |
-| [Spring AI MCP Security](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-security.html) | HTTP MCP Server 的安全配置 |
+| [Spring AI MCP Security](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-security.html) | 社区驱动的 MCP Security 模块；当前文档标注为进行中且未获 Spring AI 官方背书，需单独评估 |
 
-Spring AI 的在线参考文档会随版本变化。项目实施时要核对 Spring Boot、Spring AI BOM、MCP Java SDK 和传输协议的兼容关系。
+Spring AI 的在线参考文档会随版本变化。项目实施时要核对 Spring Boot、Spring AI BOM、MCP Java SDK 和传输协议的兼容关系。 本次查看的 Spring AI 在线参考文档显示版本为 2.1.0；该版本信息不代表你的项目应直接升级到 2.1.0。
 
 ## 7. 跨宿主插件资料
 

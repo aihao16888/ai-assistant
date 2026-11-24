@@ -80,7 +80,7 @@ Spring AI 提供 Spring Boot MCP Server Starter。
 | Spring MVC | spring-ai-starter-mcp-server-webmvc | spring.ai.mcp.server.protocol=STREAMABLE |
 | Spring WebFlux | spring-ai-starter-mcp-server-webflux | spring.ai.mcp.server.protocol=STREAMABLE |
 
-如果现有项目使用 spring-boot-starter-web（Spring MVC），通常先选 WebMVC Starter；不要为了接入 MCP 就无理由地把现有应用切换到 WebFlux。
+如果现有项目使用 spring-boot-starter-web（Spring MVC），通常先选 WebMVC Starter；不要为了接入 MCP 就无理由地把现有应用切换到 WebFlux。 当前 Spring AI 2.1.0 参考文档将 SSE 标记为自 2.0.0 起弃用，新接入优先选择 Streamable HTTP。
 
 依赖版本需要通过与你项目 Spring Boot 版本兼容的 Spring AI BOM 管理，不要直接复制其他项目的版本号。
 
@@ -192,6 +192,8 @@ Spring AI 官方文档明确提醒：HTTP MCP Server 默认不会自动提供认
 正确方式是：Java 服务从经过验证的身份凭据中取得当前 Principal，再执行权限检查。模型提供的项目 ID、文档 ID 也必须由服务端重新校验。
 
 如果 DSH 使用固定服务 Token，那么后端看到的可能只是服务账号身份。多用户场景应设计用户级 OAuth、受控 Token Exchange 或其他可信身份委托机制。
+
+当前 Spring AI MCP Security 参考页还明确标注为进行中，并说明该安全模块由社区项目维护、尚未获得 Spring AI 官方背书。可以评估它的能力，但不能把它当成 Spring AI 核心 Starter 已经提供的稳定安全保证。企业项目应先明确自己的 Spring Security / OAuth 资源服务器边界，再决定是否引入该社区模块。
 
 ## 7. 写操作应分阶段开放
 
