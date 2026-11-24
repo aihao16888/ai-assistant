@@ -15,7 +15,7 @@
 5. DeepSeek 官方产品页直接链接的 Cordis 论文由作者单位包含 DeepSeek-AI 的作者共同署名，并在第 5.3 节以 Koishi 为案例。
 6. **目前没有直接证据证明 DeepSeek 官方声明“DeepSeek Harness 的设计参考了 Koishi”。**
 
-第 5 点是最需要守住的证据边界。
+第 6 点是最需要守住的证据边界。
 
 ## 2. DeepSeek 官方明确记录了什么？
 
@@ -35,7 +35,7 @@ vendor manifest 还记录了其他 Cordis 相关包，例如 Loader、Include、
 
 这能够证明：**DeepSeek Harness 的直接代码来源是 Cordis 上游仓库，并且官方通过固定版本和 Commit 管理 vendored 源码。**
 
-它不能单独证明 DeepSeek 团队最初为什么选择 Cordis，也不能证明他们研究过哪一篇 Koishi 文章。
+它不能单独证明 DeepSeek 团队最初为什么选择 Cordis，也不能证明他们研究过 Koishi 的《Disposable Plugin System》这篇具体文章；论文确实把 Koishi 项目作为案例研究。
 
 ## 3. Cordis 与 Koishi 的历史关系
 
@@ -57,7 +57,7 @@ Koishi 官方设计文章《Disposable Plugin System》进一步解释了可逆�
 
 这篇文章是理解 Cordis 设计背景的重要一手资料。
 
-但它的证据用途是解释 Koishi / Cordis 生态的设计思想，不是证明 DeepSeek 团队在开发 Harness 时参考了这篇文章。
+需要与 Cordis 理论论文区分：Koishi 文章解释 Koishi 侧的设计背景；DeepSeek 官方产品页链接的 Cordis 论文则由作者单位包含 DeepSeek-AI 的作者共同署名，并在第 5.3 节直接把 Koishi 作为案例研究。后者证明 DeepSeek-AI 关联作者研究了 Koishi 这一 Cordis 实际应用案例，但不能证明他们以这篇 Koishi 文章作为 DSH 产品设计依据。
 
 ## 4. 三个不同层次的判断
 
@@ -67,14 +67,14 @@ Koishi 官方设计文章《Disposable Plugin System》进一步解释了可逆�
 | DSH vendored Cordis 来自 cordiverse/cordis | vendor manifest 记录上游仓库、版本和 Commit | 可以确认 |
 | Cordis 与 Koishi 有历史联系 | Koishi 官方历史、4.7.1 发布记录、Cordis 论文的 Koishi 案例研究 | 可以确认 |
 | DeepSeek-AI 关联作者在 Cordis 论文中研究 Koishi | 官方产品页链接该论文；论文作者单位含 DeepSeek-AI；第 5.3 节为 Koishi 案例 | 可以确认 |
-| DeepSeek 官方明确说“参考 Koishi” | 本次核查的官方产品页、架构文档、Cordis 文档和 vendor manifest 未发现直接声明 | 不能确认 |
+| DeepSeek 官方明确说“参考 Koishi” | 本次核查的官方产品页、架构文档、Cordis 文档和 vendor manifest 未发现“DSH 产品设计源自 Koishi”的直接因果声明 | 不能确认 |
 | DeepSeek 团队内部选择 Cordis 的完整决策过程 | 没有找到公开的完整决策记录 | 不应推断 |
 
 ## 5. 建议在其他文档中如何表述？
 
 可以写：
 
-> DeepSeek Harness 使用的 Cordis 直接来自 cordiverse/cordis，DeepSeek 官方 vendor manifest 记录了上游版本和 Commit。Cordis 与 Koishi 项目有明确的历史联系，Koishi 官方资料可以帮助理解其可逆插件系统的设计背景。但目前没有直接证据证明 DeepSeek 官方明确声明参考了 Koishi。
+> DeepSeek Harness 使用的 Cordis 直接来自 cordiverse/cordis，DeepSeek 官方 vendor manifest 记录了上游版本和 Commit。DeepSeek 官方产品页链接的 Cordis 理论论文由作者单位包含 DeepSeek-AI 的作者共同署名，并在第 5.3 节以 Koishi 为案例研究。这证明 Koishi 被明确纳入 Cordis 的生产案例分析；但目前没有直接证据证明 DeepSeek Harness 的产品设计是从 Koishi 借鉴而来。
 
 不应该写：
 
