@@ -1,6 +1,6 @@
 # 08｜跨 Agent Host 的复用策略
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 本篇回答：同一套业务能力能否同时服务 DeepSeek Harness、Codex 和 Claude Code？
 

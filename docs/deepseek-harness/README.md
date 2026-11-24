@@ -1,6 +1,6 @@
 # DeepSeek Harness 与面向 Agent 的开发
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜用途：目录索引与阅读导航
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜用途：目录索引与阅读导航
 
 本目录按学习顺序整理 DeepSeek Harness 的产品定位、运行架构、Cordis 插件机制、原生插件开发、Tool / Skill / MCP 能力边界，以及企业 Java 系统接入 Agent 的工程方法。
 

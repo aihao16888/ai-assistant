@@ -1,6 +1,6 @@
 # 05｜Tool、Skill、MCP 与 Plugin 的边界
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 本篇是从“理解 Harness”转向“面向 Agent 开发”的关键章节。四个概念不是同一层次，也不能互相替代。
 

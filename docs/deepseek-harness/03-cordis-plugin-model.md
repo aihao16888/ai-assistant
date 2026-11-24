@@ -1,6 +1,6 @@
 # 03｜Cordis 插件模型与生命周期
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 前置：[02｜运行架构与组合机制](./02-runtime-architecture.md)。  
 > 本篇讲 Cordis 的核心抽象；原生插件的完整开发步骤放在下一篇。
@@ -157,7 +157,9 @@ Cordis 上游论文使用两个维度解释插件组合：
 
 这里的“空间”不是地理空间，而是软件运行环境中的组件关系。两个维度合起来，强调的不只是代码拆分，还包括运行期间的动态组合和依赖管理。
 
-这部分来自 Cordis 上游论文，是理解 Cordis 设计思想的理论材料；它不是 DeepSeek 对自身内部设计动机的直接声明。
+这篇论文由 Yifan Shi、Wei Zhang、Tianyi Cui 署名，作者单位包含 Peking University 和 DeepSeek-AI；DeepSeek 官方产品页也直接链接到该论文。论文第 5.3 节以 Koishi 为案例，称 Koishi 是建立在 Cordis 上的开源聊天机器人框架；脚注说明 Koishi 使用 Cordis v3，而论文介绍 Cordis v4。
+
+因此，这篇论文是与 DeepSeek-AI 有直接关联的 Cordis 理论资料，也明确把 Koishi 作为 Cordis 的生产案例。但它证明的是 Cordis 与 Koishi 的实际关系及研究案例，不足以证明 DeepSeek Harness 的设计是“参考 Koishi 后做出来的”。
 
 另外，Cordis 的可逆性有明确边界：如果插件绕过受管理的 Context API，直接使用全局变量或未封装的底层 API，相关副作用可能无法被框架完整追踪和回收。因此，不能把 Cordis 描述成自动保证所有代码资源安全的机制。
 

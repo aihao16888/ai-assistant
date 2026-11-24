@@ -1,6 +1,6 @@
 # 01｜DeepSeek Harness 的产品定位与基本概念
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 阅读位置：第一篇。先建立 Model、Agent、Harness 的边界，再进入内部架构。
 

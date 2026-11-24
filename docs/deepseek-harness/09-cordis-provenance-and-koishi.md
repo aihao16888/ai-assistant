@@ -1,6 +1,6 @@
 # 09｜Cordis 上游来源与 Koishi 证据边界
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 本篇只处理来源核查。它不推断 DeepSeek 团队内部未公开的技术决策。
 
@@ -12,7 +12,8 @@
 2. DeepSeek Harness 将 Cordis 源码以 vendoring 方式放入自己的仓库；
 3. DeepSeek 的 vendor manifest 将 Cordis 上游项目指向 cordiverse/cordis，并记录了上游版本和 Git Commit；
 4. Cordis 与 Koishi 生态有明确的历史联系；
-5. **目前没有直接证据证明 DeepSeek 官方声明“我们的 Harness 设计参考了 Koishi”。**
+5. DeepSeek 官方产品页直接链接的 Cordis 论文由作者单位包含 DeepSeek-AI 的作者共同署名，并在第 5.3 节以 Koishi 为案例。
+6. **目前没有直接证据证明 DeepSeek 官方声明“DeepSeek Harness 的设计参考了 Koishi”。**
 
 第 5 点是最需要守住的证据边界。
 
@@ -64,7 +65,8 @@ Koishi 官方设计文章《Disposable Plugin System》进一步解释了可逆�
 |---|---|---|
 | DeepSeek Harness 使用 Cordis | DeepSeek 官方架构文档、源码和 vendor manifest | 可以确认 |
 | DSH vendored Cordis 来自 cordiverse/cordis | vendor manifest 记录上游仓库、版本和 Commit | 可以确认 |
-| Cordis 与 Koishi 有历史联系 | Koishi 官方历史、4.7.1 发布记录、Cordis 官方设计文章 | 可以确认 |
+| Cordis 与 Koishi 有历史联系 | Koishi 官方历史、4.7.1 发布记录、Cordis 论文的 Koishi 案例研究 | 可以确认 |
+| DeepSeek-AI 关联作者在 Cordis 论文中研究 Koishi | 官方产品页链接该论文；论文作者单位含 DeepSeek-AI；第 5.3 节为 Koishi 案例 | 可以确认 |
 | DeepSeek 官方明确说“参考 Koishi” | 本次核查的官方产品页、架构文档、Cordis 文档和 vendor manifest 未发现直接声明 | 不能确认 |
 | DeepSeek 团队内部选择 Cordis 的完整决策过程 | 没有找到公开的完整决策记录 | 不应推断 |
 
@@ -84,17 +86,20 @@ Koishi 官方设计文章《Disposable Plugin System》进一步解释了可逆�
 
 ## 6. 本篇应掌握的结论
 
-**代码来源、历史关系和设计影响是三个不同的问题。**
+**代码来源、历史关系、案例研究和产品设计影响是四个不同的问题。**
 
 - vendor manifest 证明直接代码来源；
 - Koishi 官方资料解释 Cordis 的历史与设计背景；
-- DeepSeek 的设计动机必须有 DeepSeek 自己的直接证据。
+- DeepSeek-AI 关联作者的 Cordis 论文明确把 Koishi 作为案例研究；
+- 但“DeepSeek Harness 的产品设计参考 Koishi”仍需要直接的因果声明，不能从案例研究反推。
 
 没有直接证据时，应保留“待考察”，而不是用合理推测补齐故事。
 
 ## 7. 一手资料
 
+- [DeepSeek Harness 官方产品页（含 Cordis 论文入口）](https://www.deepseek.com/harness/zh/)
 - [DeepSeek Harness vendor/README.md（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/vendor/README.md)
+- [Cordis 理论论文：A Programming Paradigm for Spatiotemporal Composability](https://arxiv.org/abs/2608.25512)
 - [Cordis 上游仓库](https://github.com/cordiverse/cordis)
 - [Koishi 官方 History](https://koishi.chat/en-US/about/history)
 - [Koishi 4.7.1 发布记录](https://github.com/koishijs/koishi/discussions/691)

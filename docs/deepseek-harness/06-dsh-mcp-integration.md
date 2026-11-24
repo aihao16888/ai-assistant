@@ -1,6 +1,6 @@
 # 06｜DeepSeek Harness 的 MCP 接入机制
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 前置：[05｜Tool、Skill、MCP 与 Plugin 的边界](./05-tool-skill-mcp-boundaries.md)。  
 > 本篇讲 DSH 自己已经提供什么，不重复介绍 MCP 通用协议。

@@ -1,6 +1,6 @@
 # 02｜DeepSeek Harness 的运行架构与组合机制
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 前置：阅读 [01｜产品定位与基本概念](./01-positioning-and-concepts.md)。  
 > 本篇只解释 Harness 内部如何组成和运行，不展开插件代码细节。

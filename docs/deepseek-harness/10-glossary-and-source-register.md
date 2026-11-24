@@ -1,6 +1,6 @@
 # 10｜术语表与参考资料
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 本篇是整个目录的术语和来源索引。若正文与官方实现不一致，以对应固定版本的官方文档和源码为准。
 
@@ -72,6 +72,7 @@
 | [MCP Client](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/mcp/mcp-client/README.zh.md) | 外部 MCP Server 连接、工具桥接和传输 |
 | [MCP Manager](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/mcp/mcp-manager/README.zh.md) | 运行时服务器管理、凭据和插件注册 |
 | [Vendored Packages Manifest](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/vendor/README.md) | Cordis 上游来源、版本和 Commit |
+| [Cordis 理论论文](https://arxiv.org/abs/2608.25512) | DeepSeek 官方产品页链接；作者单位包括 DeepSeek-AI；第 5.3 节以 Koishi 为案例研究 |
 
 ## 5. Cordis / Koishi 资料
 

@@ -1,6 +1,6 @@
 # 04｜DeepSeek Harness 原生插件开发
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 前置：[03｜Cordis 插件模型与生命周期](./03-cordis-plugin-model.md)。  
 > 本篇只讲 DeepSeek Harness 原生 Cordis Plugin，不讲 Java MCP Server。

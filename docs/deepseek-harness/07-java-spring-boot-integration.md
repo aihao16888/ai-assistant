@@ -1,6 +1,6 @@
 # 07｜Java / Spring Boot 业务系统如何接入 Agent
 
-> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+> 更新日期：2026-11-24｜资料核查：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
 
 > 本篇是面向企业后端工程的工程设计建议，不是 DeepSeek 官方规定的唯一接入架构。  
 > 前置：[06｜DeepSeek Harness 的 MCP 接入机制](./06-dsh-mcp-integration.md)。
