@@ -1,8 +1,8 @@
 # 诺因智能｜后端开发工程师专项准备
 
-> 关联招聘资料：[岗位招聘要求](../../company-requirements/nuoyin-intelligent/backend-development-engineer.md)  
-> 关联个人素材：[DMS 项目素材](../../candidate-materials/projects/document-management-system.md)  
-> 关联技术栈：[个人技术栈盘点](../../candidate-materials/technology-stack-inventory.md)  
+> 关联招聘资料：[岗位招聘要求](../../../companies/nuoyin-intelligent/backend-engineer/job-description.md)  
+> 关联个人素材：[DMS 项目素材](../../../profile/projects/document-management-system.md)  
+> 关联技术栈：[个人技术栈盘点](../../../profile/skills-inventory.md)  
 > 准备版本：v0.1  
 > 建立日期：2026-11-23  
 > 状态：**待用户审计，尚未进入最终背诵稿阶段**
@@ -17,27 +17,9 @@
 4. 对没有实践过的技术建立必要的概念认知；
 5. 形成一份可以在下一家公司复用的准备资产。
 
-## 2. JD 与个人经历匹配矩阵
+## 2. 本轮重点项目故事
 
-| JD 要求 | 当前个人素材 | 初步匹配 | 准备重点 |
-|---|---|---|---|
-| 1–3 年后端经验 | 约 3 年 Java 后端经历 | 已匹配（以简历日期核对） | 准备清晰的工作时间线和职责 |
-| Java / Go / Python / Node.js 至少一种 | Java 后端开发 | 已匹配 | Java 并发、集合、JVM、Spring |
-| MySQL / PostgreSQL、SQL 优化 | 有数据库查询与类型映射问题案例；两种数据库的具体项目分工待确认 | 部分匹配 | 索引、执行计划、事务、慢 SQL |
-| Redis、MongoDB | Redis 在 DMS 防重和编号生成中使用；MongoDB 未确认 | 部分匹配 | Redis 原子性、分布式锁；MongoDB 先补基础 |
-| Kafka / RabbitMQ / RocketMQ | 有 RabbitMQ 与 OA 审批同步的实际场景 | 部分匹配 | RabbitMQ 可靠性、ACK、重试、幂等；Kafka/RocketMQ 了解差异 |
-| Linux | 在服务器查看日志、定位问题 | 部分匹配 | 整理一个完整线上排障案例 |
-| Git | 日常代码提交与推送 | 部分匹配 | 分支协作、冲突、回滚和代码审查 |
-| 代码规范、单元测试 | 当前未收集足够个人案例 | 待确认 | 补充实际测试方式、覆盖范围和规范实践 |
-| 分布式系统、微服务 | 系统涉及三台服务器，具体部署拓扑待确认 | 部分匹配 | 多实例、负载均衡、共享数据库、服务间通信 |
-| Docker / Kubernetes / 云原生 | 用户明确没有 Docker 实际使用经历；Kubernetes 未确认 | 未匹配/待补基础 | 了解容器与编排概念，不写成项目经验 |
-| 高可用、高性能、可扩展 | 有线上维护、并发和查询问题素材，缺少量化结果 | 部分匹配 | 讲清设计目的、瓶颈和验证证据 |
-| 架构设计、方案评审 | 个人参与范围待确认 | 待确认 | 补充实际参与过的方案和决策 |
-| 独立负责模块、推动交付 | 用户有大型项目模块负责经历 | 部分匹配 | 具体到模块、职责、协作对象和交付结果 |
-
-“已匹配”只表示经历方向符合，不表示已经达到招聘方所说的熟练或精通。
-
-## 3. 本轮重点项目故事
+本轮岗位匹配结论单独维护在[JD 匹配分析](./jd-match-analysis.md)；简历措辞调整单独维护在[项目经历调整记录](./project-experience-adjustment.md)。
 
 ### 故事 1：安全编码生成与 Redis 并发控制
 
@@ -53,7 +35,7 @@
 - 锁过期、服务宕机、缓存丢失、数据库回写失败时怎么办；
 - 数据库唯一约束是否作为最后防线。
 
-参考材料：[Redis 缓存、分布式锁与唯一序号](../../technical-knowledge/redis/cache-lock-counter-and-uniqueness.md)
+参考材料：[Redis 缓存、分布式锁与唯一序号](../../../knowledge/redis/cache-lock-counter-and-uniqueness.md)
 
 ### 故事 2：Redis 防止重复受控发布
 
@@ -81,7 +63,7 @@
 - 第三方同步成功、超时、失败时如何处理；
 - 重复消息如何避免重复副作用。
 
-参考材料：[RabbitMQ 与 OA 审批节点同步](../../technical-knowledge/messaging/rabbitmq-and-oa-approval-sync.md)
+参考材料：[RabbitMQ 与 OA 审批节点同步](../../../knowledge/messaging/rabbitmq-and-oa-approval-sync.md)
 
 ### 故事 4：数据库类型映射与 SQL 查询
 
@@ -95,7 +77,7 @@
 - EXPLAIN 如何验证；
 - 调整类型后如何回归测试。
 
-参考材料：[MySQL、PostgreSQL 与 SQL 性能优化](../../technical-knowledge/database/mysql-postgresql-and-sql-performance.md)
+参考材料：[MySQL、PostgreSQL 与 SQL 性能优化](../../../knowledge/database/mysql-postgresql-and-sql-performance.md)
 
 ### 故事 5：三台服务器与分布式部署
 
@@ -110,9 +92,9 @@
 - 数据库如何通过事务和约束保护数据；
 - 单个应用节点或数据库故障会发生什么。
 
-参考材料：[微服务、多实例部署与数据一致性](../../technical-knowledge/microservices/distributed-deployment-and-data-consistency.md)
+参考材料：[微服务、多实例部署与数据一致性](../../../knowledge/distributed-systems/distributed-deployment-and-data-consistency.md)
 
-## 4. 本轮知识复习顺序
+## 3. 本轮知识复习顺序
 
 | 顺序 | 知识专题 | 优先级 | 目标状态 |
 |---|---|---|---|
@@ -125,7 +107,7 @@
 | 7 | MongoDB、Kafka/RocketMQ 基础 | P1/P2 | S1–S2 |
 | 8 | Docker/Kubernetes/云原生基础 | P1 | S1–S2，不包装为项目经验 |
 
-## 5. 第一轮模拟面试题
+## 4. 第一轮模拟面试题
 
 ### 项目与架构
 1. 请介绍你负责的文档管理系统模块。
@@ -171,7 +153,7 @@
 
 以上是第一轮题库，不代表真实面试题。
 
-## 6. 本轮必须补齐的个人事实
+## 5. 本轮必须补齐的个人事实
 
 - [ ] DMS 项目中本人负责的模块边界。
 - [ ] 三台服务器的真实拓扑。
@@ -184,7 +166,7 @@
 - [ ] Linux 排查过的一个完整线上问题。
 - [ ] 单元测试和代码评审的真实参与情况。
 
-## 7. 面试结束后复盘模板
+## 6. 面试结束后复盘模板
 
 | 字段 | 记录 |
 |---|---|
@@ -198,7 +180,7 @@
 | 项目事实需要补证的地方 | 待填写 |
 | 下一轮行动 | 待填写 |
 
-## 8. 审计清单
+## 7. 审计清单
 
 - [ ] JD 与个人经历的匹配判断合理。
 - [ ] P0/P1/P2 排序合理。

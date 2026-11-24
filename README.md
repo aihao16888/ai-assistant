@@ -31,6 +31,7 @@
 │   └── YYYY-MM-DD.md
 ├── inbox/                 # 待整理的外部资料
 ├── topics/                # 跨项目的主题资料与调研
+├── job-search/            # Java 后端求职、简历匹配与面试学习工作区
 ├── templates/             # 文档模板，统一格式
 ├── README.md              # 本文件：工作空间说明
 └── AGENTS.md              # 与 AI 助理的协作约定
@@ -44,6 +45,7 @@
 2. AI 助理按任务收集外部内容并整理。
 3. 整理结果写入对应目录的 Markdown 文档。
 4. 同步更新相关项目的进展文档。
+5. 求职与面试准备统一维护在 [job-search/](job-search/)，不要混入通用 docs/ 或 topics/。
 
 ## 维护
 

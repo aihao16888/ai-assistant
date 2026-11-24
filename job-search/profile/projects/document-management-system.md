@@ -195,3 +195,13 @@ Docker、Kubernetes、Kafka、MongoDB、Go/Python/Node.js 是否使用过，当�
 - [ ] 三台服务器的部署拓扑是什么？
 - [ ] 哪一个线上问题最适合用来讲 Linux 排障？
 
+
+
+## 9. 关联的求职准备材料
+
+- [个人技术栈与实践边界盘点](../skills-inventory.md)
+- [安全编码生成与 Redis 并发面试故事](../../interview-assets/story-bank/security-code-generation-and-redis-concurrency.md)
+- [Redis 缓存、分布式锁与唯一序号知识专题](../../knowledge/redis/cache-lock-counter-and-uniqueness.md)
+- [RabbitMQ 与 OA 审批节点同步](../../knowledge/messaging/rabbitmq-and-oa-approval-sync.md)
+- [MySQL、PostgreSQL 与 SQL 性能优化](../../knowledge/database/mysql-postgresql-and-sql-performance.md)
+- [微服务、多实例部署与数据一致性](../../knowledge/distributed-systems/distributed-deployment-and-data-consistency.md)
