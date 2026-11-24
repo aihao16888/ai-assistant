@@ -1,5 +1,7 @@
 # 08｜跨 Agent Host 的复用策略
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 本篇回答：同一套业务能力能否同时服务 DeepSeek Harness、Codex 和 Claude Code？
 
 ## 1. 先区分“复用能力”和“复用插件”
@@ -128,3 +130,8 @@ document-plugin/
 - [DeepSeek Harness 插件发布规范（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/docs/user/develop/basic/publish.zh.md)
 
 **下一篇：** [09｜Cordis 上游来源与 Koishi 证据边界](./09-cordis-provenance-and-koishi.md)。回到最初的来源问题，严格区分代码来源、历史背景和设计动机。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

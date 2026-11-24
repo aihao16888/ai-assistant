@@ -1,5 +1,7 @@
 # 09｜Cordis 上游来源与 Koishi 证据边界
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 本篇只处理来源核查。它不推断 DeepSeek 团队内部未公开的技术决策。
 
 ## 1. 先给结论
@@ -99,3 +101,8 @@ Koishi 官方设计文章《Disposable Plugin System》进一步解释了可逆�
 - [Koishi 官方设计文章：Disposable Plugin System](https://koishi.chat/en-US/cookbook/design/disposable)
 
 **下一篇：** [10｜术语表与参考资料](./10-glossary-and-source-register.md)，集中核对术语、来源和版本基线。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

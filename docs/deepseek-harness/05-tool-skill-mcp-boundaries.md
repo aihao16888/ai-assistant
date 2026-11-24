@@ -1,5 +1,7 @@
 # 05｜Tool、Skill、MCP 与 Plugin 的边界
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 本篇是从“理解 Harness”转向“面向 Agent 开发”的关键章节。四个概念不是同一层次，也不能互相替代。
 
 ## 1. 一张表先区分清楚
@@ -152,3 +154,8 @@ Skill 指导 Agent 汇总缺失材料
 - [MCP 官方架构说明](https://modelcontextprotocol.io/docs/learn/architecture)
 
 **下一篇：** [06｜DeepSeek Harness 的 MCP 接入机制](./06-dsh-mcp-integration.md)。把 MCP 的通用概念落实到 DSH 已有的客户端和服务器管理能力。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

@@ -1,5 +1,7 @@
 # 01｜DeepSeek Harness 的产品定位与基本概念
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 阅读位置：第一篇。先建立 Model、Agent、Harness 的边界，再进入内部架构。
 
 ## 1. 先给结论
@@ -100,3 +102,8 @@ DeepSeek Harness 官方仓库将项目标记为**开发者预览**，并明确�
 - [DeepSeek Harness 官方仓库 README（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/README.zh.md)
 
 **下一篇：** [02｜运行架构与组合机制](./02-runtime-architecture.md)。理解 Harness 内部为什么采用插件化，以及 Profile、Bundle、Patch 如何组成运行时。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

@@ -1,5 +1,7 @@
 # 06｜DeepSeek Harness 的 MCP 接入机制
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 前置：[05｜Tool、Skill、MCP 与 Plugin 的边界](./05-tool-skill-mcp-boundaries.md)。  
 > 本篇讲 DSH 自己已经提供什么，不重复介绍 MCP 通用协议。
 
@@ -153,3 +155,8 @@ DSH 的凭据模板解决的是连接配置中密钥的保存和解析问题，�
 - [DSH MCP Manager（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/mcp/mcp-manager/README.zh.md)
 
 **下一篇：** [07｜Java / Spring Boot 业务系统接入](./07-java-spring-boot-integration.md)。将连接配置进一步落实为现有 Java 项目的服务端架构。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

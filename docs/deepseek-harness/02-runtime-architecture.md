@@ -1,5 +1,7 @@
 # 02｜DeepSeek Harness 的运行架构与组合机制
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 前置：阅读 [01｜产品定位与基本概念](./01-positioning-and-concepts.md)。  
 > 本篇只解释 Harness 内部如何组成和运行，不展开插件代码细节。
 
@@ -160,3 +162,8 @@ Harness 的 Session 日志记录模型可见的输入、工具调用和结果，
 - [DeepSeek Harness CLI 参考（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/apps/cli/README.zh.md)
 
 **下一篇：** [03｜Cordis 插件模型与生命周期](./03-cordis-plugin-model.md)。从概念层面解释插件、Context、Service、inject、Event 和 Effect。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

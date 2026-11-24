@@ -1,5 +1,7 @@
 # 04｜DeepSeek Harness 原生插件开发
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 前置：[03｜Cordis 插件模型与生命周期](./03-cordis-plugin-model.md)。  
 > 本篇只讲 DeepSeek Harness 原生 Cordis Plugin，不讲 Java MCP Server。
 
@@ -240,3 +242,8 @@ Bundle 的 patch 会进入 Profile 的组合层，随后由 Harness 加载其中
 - [工具编写参考（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/docs/cookbook/adding-a-tool.zh.md)
 
 **下一篇：** [05｜Tool、Skill、MCP 与 Plugin 的边界](./05-tool-skill-mcp-boundaries.md)。先把能力概念区分清楚，再研究 Harness 如何连接外部 MCP Server。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

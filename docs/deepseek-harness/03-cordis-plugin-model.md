@@ -1,5 +1,7 @@
 # 03｜Cordis 插件模型与生命周期
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 前置：[02｜运行架构与组合机制](./02-runtime-architecture.md)。  
 > 本篇讲 Cordis 的核心抽象；原生插件的完整开发步骤放在下一篇。
 
@@ -145,6 +147,22 @@ export function apply(ctx: Context) {
 
 Spring 也具备依赖注入、事件和资源销毁能力。Cordis 的突出特点是把插件动态加载、卸载、依赖变化和副作用回收作为运行时核心抽象。
 
+
+### 补充：时间与空间可组合性
+
+Cordis 上游论文使用两个维度解释插件组合：
+
+- **时间可组合性（Temporal Composability）**：组件可以在运行期间加载、卸载；卸载时能够撤销其拥有的副作用。
+- **空间可组合性（Spatial Composability）**：组件能够声明对其他组件提供的服务的依赖，运行时据此管理可见性和生命周期关系。
+
+这里的“空间”不是地理空间，而是软件运行环境中的组件关系。两个维度合起来，强调的不只是代码拆分，还包括运行期间的动态组合和依赖管理。
+
+这部分来自 Cordis 上游论文，是理解 Cordis 设计思想的理论材料；它不是 DeepSeek 对自身内部设计动机的直接声明。
+
+另外，Cordis 的可逆性有明确边界：如果插件绕过受管理的 Context API，直接使用全局变量或未封装的底层 API，相关副作用可能无法被框架完整追踪和回收。因此，不能把 Cordis 描述成自动保证所有代码资源安全的机制。
+
+来源：[A Programming Paradigm for Spatiotemporal Composability](https://arxiv.org/abs/2608.25512)。
+
 ## 9. 本篇应掌握的结论
 
 - 插件通过 apply(ctx) 接入运行时。
@@ -161,3 +179,8 @@ Spring 也具备依赖注入、事件和资源销毁能力。Cordis 的突出特
 - [第一个 Harness 插件（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/docs/user/develop/basic/index.zh.md)
 
 **下一篇：** [04｜DeepSeek Harness 原生插件开发](./04-native-plugin-development.md)。把这些概念落到 TypeScript / JavaScript 插件代码和安装包。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。

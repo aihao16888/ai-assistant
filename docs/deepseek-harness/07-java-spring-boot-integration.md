@@ -1,5 +1,7 @@
 # 07｜Java / Spring Boot 业务系统如何接入 Agent
 
+> 更新日期：2026-11-24｜归属：DeepSeek Harness 专题｜关联任务：从 Harness 原理到 Agent 开发与业务系统集成
+
 > 本篇是面向企业后端工程的工程设计建议，不是 DeepSeek 官方规定的唯一接入架构。  
 > 前置：[06｜DeepSeek Harness 的 MCP 接入机制](./06-dsh-mcp-integration.md)。
 
@@ -266,3 +268,8 @@ Agent Host 提供自然语言入口和任务编排。
 - [DeepSeek Harness MCP Manager（固定快照）](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/mcp/mcp-manager/README.zh.md)
 
 **下一篇：** [08｜跨 Agent Host 的复用策略](./08-cross-host-reuse.md)。同一套 Java MCP Server 如何被不同 Agent Host 使用。
+
+
+## 更新记录
+
+- 2026-11-24：按编号学习路径拆分原单文件，补充官方来源核查并明确技术边界。
