@@ -71,6 +71,7 @@
 | [Skills 子系统](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/docs/subsystems/skills.zh.md) | Skill Provider、Registry、目录发现和按需加载 |
 | [MCP Client](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/mcp/mcp-client/README.zh.md) | 外部 MCP Server 连接、工具桥接和传输 |
 | [MCP Manager](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/packages/mcp/mcp-manager/README.zh.md) | 运行时服务器管理、凭据和插件注册 |
+| [MCP 子系统](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/docs/subsystems/mcp.zh.md) | 当前支持与不支持的 MCP 能力边界 |
 | [Vendored Packages Manifest](https://github.com/deepseek-ai/deepseek-harness/blob/4b399c39a6d1479cd84ca591b4d7c88e24d38a96/vendor/README.md) | Cordis 上游来源、版本和 Commit |
 | [Cordis 理论论文](https://arxiv.org/abs/2608.25512) | DeepSeek 官方产品页链接；作者单位包括 DeepSeek-AI；第 5.3 节以 Koishi 为案例研究 |
 

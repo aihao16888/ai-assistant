@@ -131,11 +131,12 @@ DSH 的凭据模板解决的是连接配置中密钥的保存和解析问题，�
 根据当前官方 mcp-client 文档：
 
 - 外部 MCP Tools 可以被桥接为 Harness Tools；
-- 可以读取支持的 MCP Resources；
+- MCP Resources 通过共享资源服务按需读取，调用方必须指定已配置且可见的服务器；
+- 资源订阅当前不受支持；
 - 工具列表变化会触发同步；
 - 连接失败会影响对应服务器的工具可用性，并按配置执行重连；
 - 可以配置 eager 或 on-demand 工具加载；
-- MCP Prompt 模板当前不受支持。
+- MCP Prompt 模板、人类输入 elicitation 和 task-based execution 当前不受支持。
 
 不要把 MCP 协议的全部能力，直接等同于 DSH 当前客户端已经完整实现的能力。
 

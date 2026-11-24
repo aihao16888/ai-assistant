@@ -90,7 +90,7 @@ MCP 协议包含的能力类型不止 Tool：
 | Resources | 可读取的数据和内容 |
 | Prompts | 可复用的提示模板 |
 
-但要注意：协议标准支持某项能力，不代表每个 MCP Client 都完整实现了它。当前 DeepSeek Harness 的 mcp-client 文档说明，其工具与资源能力可以接入，但 MCP Prompt 模板当前不受支持。实施时要以具体 Host 的能力矩阵为准。
+但要注意：协议标准支持某项能力，不代表每个 MCP Client 都完整实现了它。当前 DeepSeek Harness 支持 MCP Tools 和按需读取 Resources；其 MCP Prompt 模板、人类输入 elicitation、task-based execution 和 resource subscriptions 当前不受支持。实施时要以具体 Host 的能力矩阵为准。
 
 ## 5. Plugin：宿主如何组织和分发扩展？
 
