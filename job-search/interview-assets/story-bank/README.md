@@ -2,6 +2,22 @@
 
 项目故事不是把技术名词串成一段话，而是从真实业务问题出发，讲清楚本人做了什么、为什么这样做、结果如何，以及技术方案的边界。
 
+## 简历与故事的关系
+
+简历负责在有限篇幅内说明“做过什么、解决什么问题、使用什么技术、产生什么结果”；故事库负责把简历中的每条关键内容展开，让候选人能够回答连续追问。
+
+当前 DMS 简历条目采用 DMS-01 至 DMS-05 编号。每条简历描述都应能回到项目事实，并找到对应故事。
+
+## 当前 DMS 故事
+
+| 故事 ID | 简历内容 | 故事文档 | 状态 |
+|---|---|---|---|
+| DMS-01 | 项目背景、业务范围与本人参与情况 | [DMS 完整项目素材 §5 项目介绍](../../profile/projects/document-management-system.md) | 有 60 秒初稿，职责待确认 |
+| DMS-02 | Redis 防止同一文件重复受控发布 | [Redis 重复提交防护](./redis-duplicate-submission.md) | 初稿，命令与异常分支待确认 |
+| DMS-03 | 安全编码批量生成与并发序号控制 | [安全编码生成与 Redis 并发控制](./security-code-generation-and-redis-concurrency.md) | 已有详细故事，底层实现仍有待核实项 |
+| DMS-04 | RabbitMQ 同步 OA 审批节点消息 | [RabbitMQ 与 OA 审批节点同步](./rabbitmq-oa-approval-sync.md) | 初稿，消息拓扑与可靠性机制待确认 |
+| DMS-05 | Java 与数据库字段类型不一致的查询问题 | [数据库类型映射与查询排查](./database-type-mismatch-query.md) | 初稿，SQL 和执行计划证据待补 |
+
 ## 每个故事建议包含
 
 1. 业务背景与目标；
@@ -14,8 +30,10 @@
 8. 60–90 秒表达稿；
 9. 面试官可能追问的问题。
 
-## 当前故事
+## 维护原则
 
-- [文档安全编码生成与 Redis 并发控制](./security-code-generation-and-redis-concurrency.md)：围绕全局唯一编码、批量序号竞争、本地锁、Redis 分布式锁、计数器和数据库序号持久化展开。
-
-项目原始素材见 [DMS 项目经历](../../profile/projects/document-management-system.md)。通用 Redis 原理见 [Redis 知识专题](../../knowledge/redis/cache-lock-counter-and-uniqueness.md)。
+- 故事必须来自 profile 中的真实项目素材。
+- 简历表述不能强于已确认的项目事实。
+- 通用技术方案必须标明“知识准备”或“待核实”，不能伪装成项目实现。
+- 问题必须标记来源：真实面试、岗位 JD 推断或自主练习。
+- 回答框架用于组织表达，不得替代真实事实和技术证据。
