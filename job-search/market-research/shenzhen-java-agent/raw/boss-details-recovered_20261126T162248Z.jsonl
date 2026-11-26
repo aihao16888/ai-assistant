@@ -1,0 +1,2 @@
+{"type":"recovery-manifest","source":"OpenCLI retained HTML trace (offline)","collectedAt":"2026-11-26T16:22:48.054Z","inputFile":"raw/boss-details_20261126T152732Z.jsonl","searchInput":"raw/boss-search_20261126T152359Z.jsonl","attempted":0,"requestsSent":0}
+{"type":"recovery-manifest","source":"OpenCLI retained HTML trace (offline)","collectedAt":"2026-11-26T16:22:48.094Z","inputFile":"raw/boss-details_20261126T153430Z.jsonl","searchInput":"raw/boss-search_20261126T152359Z.jsonl","attempted":1,"requestsSent":0}

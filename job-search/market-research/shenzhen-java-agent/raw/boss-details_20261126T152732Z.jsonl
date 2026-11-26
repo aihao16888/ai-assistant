@@ -1,0 +1,2 @@
+{"type":"manifest","source":"BOSS直聘 via OpenCLI","collectedAt":"2026-11-26T15:27:32.694Z","inputFile":"raw/boss-search_20261126T152359Z.jsonl","uniqueJobs":73,"detailsKept":["title","salary","city","address","experience","degree","description","skills","welfare","company","industry","companyScale","companyStage","url"],"fieldsOmitted":["boss_name","boss_title","contact details"]}
+{"type":"error","collectedAt":"2026-11-26T15:27:32.694Z","index":1,"title":"后端开发( java python c/c++ js) 大厂","company":"某大型知名计算机软件公司","message":"opencli exited with code 77; stderr bytes=195"}

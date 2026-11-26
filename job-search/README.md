@@ -19,6 +19,7 @@
 ~~~text
 job-search/
 ├── inbox/                 # 尚未整理的招聘和面试信息
+├── market-research/       # 跨公司、跨岗位的市场调研与来源数据
 ├── companies/             # 公司、岗位与招聘信息
 ├── profile/               # 个人经历事实源、主简历和项目素材
 ├── applications/           # 每家公司、每个岗位的专项准备
@@ -39,8 +40,8 @@ job-search/
 
 ## 4. 推荐工作流程
 
-1. 新看到的招聘信息先放入 inbox，记录来源和日期。
-2. 整理后进入 companies，保留岗位原文和明确的招聘信息。
+1. 零散新看到的招聘信息先放入 inbox，记录来源和日期；跨公司批量调研放入 market-research。
+2. 整理后将值得跟进的公司和岗位归入 companies，保留岗位原文和明确的招聘信息。
 3. 以 profile 作为个人经历的唯一事实来源，不因某个岗位而改写真实事实。
 4. 在 applications 中建立该公司/岗位目录，完成 JD 匹配和简历调整。
 5. 将暴露出的知识差距转化为 knowledge 中的学习任务。
@@ -77,6 +78,10 @@ P0/P1/P2 与 S0–S4 是两套不同维度，不能互相替代。初始评估�
 - [个人经历素材库](./profile/README.md)
 - [技术知识库](./knowledge/README.md)
 - [面试素材库](./interview-assets/README.md)
+
+## 6.1 跨公司岗位调研
+
+- [深圳 Java 后端与 AI Agent 岗位调研](./market-research/shenzhen-java-agent/README.md)：汇总来源数据、清洗记录、岗位分析和筛选结果；确认值得跟进的公司后，再链接到 `companies/` 与 `applications/`。
 
 ## 7. 维护原则
 
