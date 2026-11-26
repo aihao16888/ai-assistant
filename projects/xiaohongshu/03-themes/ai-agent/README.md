@@ -1,13 +1,15 @@
 # AI Agent 主题区
 
-- 日期：2026-11-25
-- 主题：AI Agent / 智能体内容
+- 日期：2026-11-27
+- 主题：AI Agent / 智能体应用（账号的一个专题，不是账号总定位）
 - 上游：[02 对标与证据](../../02-sources/xhs/ai-agent/benchmark-deep-dive.md)
 - 选题池：[ideas.md](ideas.md)
 - 系列规划：[series.md](series.md)
 - 下游：04 制作（待建）
 
 ---
+
+> **定位说明（2026-11-27）：** 本目录保留 AI Agent / 智能体相关专题内容。账号主线已调整为“AI 实践探索”，见 [主账号定位](../../00-account/README.md) 和 [AI 实践探索主主题](../ai-practice/README.md)。本目录中的 AI 求职/JD 选题不默认作为账号首发，需等真实任务、实测证据和受众反馈齐备后再排期。
 
 ## 一、本区放什么
 
