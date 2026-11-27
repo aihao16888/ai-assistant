@@ -182,6 +182,17 @@ OpenCLI 能够执行某项操作，不代表平台允许该操作，也不代表
 - 研究结论：放在对应选题的研究文件中，并引用 Source ID；
 - 自己的实测：放在案例记录中，不混入外部作者的体验。
 
+
+## 九、OpenCLI 参考资料
+
+本项目当前参考的 OpenCLI 上游资料：
+
+- [OpenCLI 项目说明与命令发现方式](https://github.com/jackwener/OpenCLI)
+- [小红书适配器源码目录](https://github.com/jackwener/OpenCLI/tree/main/clis/xiaohongshu)
+- [小红书站点知识、搜索工作流与已知限制](https://github.com/jackwener/OpenCLI/tree/main/sitemaps/xiaohongshu)
+
+这些资料会随上游更新。执行前仍以本机安装版本的命令帮助、实际返回结果和当前平台状态为准。仓库文档只记录本项目采用的只读研究方式，不承诺某个命令在未来版本永远可用。
+
 ## 八、与其他目录的关系
 
 - [选题发现与制作工作流](../01-research/topic-discovery-and-content-workflow.md)：说明怎样从来源走到内容。
