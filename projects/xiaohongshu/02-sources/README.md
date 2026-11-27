@@ -59,7 +59,7 @@ opencli xiaohongshu comments --help
 
 ~~~bash
 # 搜索用户问题或具体任务
-opencli xiaohongshu search "AI 整理资料" --limit 10 -f json
+opencli xiaohongshu search "让 AI 按要求查找资料并标出原文位置" --limit 10 -f json
 
 # 读取某篇笔记（使用搜索结果返回的完整笔记 URL）
 opencli xiaohongshu note "<完整笔记URL>" -f json
@@ -185,6 +185,14 @@ OpenCLI 能够执行某项操作，不代表平台允许该操作，也不代表
 - 自己的实测：放在案例记录中，不混入外部作者的体验。
 
 
+## 八、与其他目录的关系
+
+- [选题发现与制作工作流](../01-research/topic-discovery-and-content-workflow.md)：说明怎样从来源走到内容。
+- [首轮选题发现计划](../01-research/first-round-topic-discovery-plan.md)：三条搜索路径、12 个首轮搜索种子和采集方法。
+- [候选选题池](../03-themes/ai-practice/topic-backlog.md)：只放已经提炼和判断过的候选选题。
+- [真实应用案例池](../03-themes/ai-practice/ideas.md)：只放自己的实际案例或准备亲自验证的事情。
+- [单篇制作入口](../04-series/README.md)：选题确定后再建立制作包。
+
 ## 九、OpenCLI 参考资料
 
 本项目当前参考的 OpenCLI 上游资料：
@@ -194,8 +202,6 @@ OpenCLI 能够执行某项操作，不代表平台允许该操作，也不代表
 - [小红书站点知识、搜索工作流与已知限制](https://github.com/jackwener/OpenCLI/tree/main/sitemaps/xiaohongshu)
 
 这些资料会随上游更新。执行前仍以本机安装版本的命令帮助、实际返回结果和当前平台状态为准。仓库文档只记录本项目采用的只读研究方式，不承诺某个命令在未来版本永远可用。
-
-## 八、与其他目录的关系
 
 - [选题发现与制作工作流](../01-research/topic-discovery-and-content-workflow.md)：说明怎样从来源走到内容。
 - [候选选题池](../03-themes/ai-practice/topic-backlog.md)：只放已经提炼和判断过的候选选题。
