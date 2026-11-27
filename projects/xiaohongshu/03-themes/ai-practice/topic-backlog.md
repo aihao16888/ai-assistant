@@ -3,6 +3,7 @@
 - 更新日期：2026-11-27
 - 账号定位：[00 账号定位](../../00-account/README.md)
 - 工作流：[选题发现、专题研究与内容制作](../../01-research/topic-discovery-and-content-workflow.md)
+- 首轮搜索计划：[first-round-topic-discovery-plan.md](../../01-research/first-round-topic-discovery-plan.md)
 - 外部素材：[02-sources](../../02-sources/README.md)
 - 自己的案例：[ideas.md](ideas.md)
 
