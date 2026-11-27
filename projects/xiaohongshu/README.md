@@ -24,7 +24,8 @@ projects/xiaohongshu/
 ├── 00-account/                       # 账号定位、受众、节奏、指标
 │   └── README.md
 ├── 01-research/                      # 平台认知、规则、方法
-│   └── xiaohongshu-beginner-guide.md
+│   ├── xiaohongshu-beginner-guide.md
+│   └── xhs-deconstruct-and-write.md
 ├── 02-sources/                       # 外部素材
 │   └── xhs/
 │       ├── ai-agent/
@@ -61,7 +62,7 @@ projects/xiaohongshu/
 | 目录 | 回答的问题 | 放什么 | 不放什么 |
 |---|---|---|---|
 | `00-account` | 这个账号是谁、给谁看、多久发一次 | 定位、受众、节奏、指标 | 对标数据、脚本 |
-| `01-research` | 小红书的规则和方法是什么 | 平台认知、入门路线、教程目录 | 我们自己的选题 |
+| `01-research` | 小红书的规则和方法是什么 | 平台认知、入门路线、教程目录、拆解/组装方法 | 我们自己的选题 |
 | `02-sources` | 别人是怎么做的 | 对标笔记、JD 数据、截图、拆解 | 我们的结论 |
 | `03-themes` | 我们决定讲什么 | 主题定位、选题池、系列规划 | 原始素材、成片 |
 | `04-series` | 这一期具体怎么做 | 单期 brief、脚本、封面、素材 | 平台研究 |
@@ -203,7 +204,7 @@ projects/xiaohongshu/
 | 区域 | 状态 | 说明 |
 |---|---|---|
 | 00 账号定位 | 初版已定 | 名称“Hardy的AI折腾记”、简介已定；头像为单独机器狗，横幅由女性大波浪散发背影与同款肩上机器狗共同展示 AI 流程 |
-| 01 研究 | 初版完成 | 入门路线、必读文章、教程目录 |
+| 01 研究 | 初版完成 | 入门路线、必读文章、教程目录、[拆解与组装方法](01-research/xhs-deconstruct-and-write.md) |
 | 02 素材 | 首轮完成 | 20 条矩阵 + 4 条深拆 + [AI 求职拆解](02-sources/xhs/ai-job/teardown.md) |
 | 03 主题 | 进行中 | AI Agent 主题、选题池、4 条系列规划 |
 | 04 制作 | A-001 草稿 | [brief](04-series/A-001-jd-pitfall/brief.md) + [script](04-series/A-001-jd-pitfall/script.md)，等真实 JD 数据 |

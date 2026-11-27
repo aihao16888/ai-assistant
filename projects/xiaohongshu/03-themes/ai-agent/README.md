@@ -3,6 +3,7 @@
 - 日期：2026-11-25
 - 主题：AI Agent / 智能体内容
 - 上游：[02 对标与证据](../../02-sources/xhs/ai-agent/benchmark-deep-dive.md)
+- 拆解方法：[xhs-deconstruct-and-write.md](../../01-research/xhs-deconstruct-and-write.md)
 - 选题池：[ideas.md](ideas.md)
 - 系列规划：[series.md](series.md)
 - 下游：04 制作（待建）

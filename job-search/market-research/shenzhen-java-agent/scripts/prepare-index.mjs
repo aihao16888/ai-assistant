@@ -12,25 +12,45 @@ const outDir = path.join(projectRoot, 'out');
 await mkdir(outDir, { recursive: true });
 
 const readJsonl = async (file) => (await readFile(file, 'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
+
+function positionKey(row) {
+  const id = String(row.securityId ?? '').trim();
+  if (id) return `id:${id}`;
+  const rawUrl = String(row.url ?? '').trim();
+  if (rawUrl) {
+    try {
+      const url = new URL(rawUrl);
+      return `url:${url.origin}${url.pathname.replace(/\/+$/, '')}`;
+    } catch {
+      return `url:${rawUrl.split(/[?#]/, 1)[0].replace(/\/+$/, '')}`;
+    }
+  }
+  return `fields:${[row.company, row.title, row.salary, row.area].map((value) => String(value ?? '').trim()).join('|')}`;
+}
+
 const searchFiles = (await readdir(rawDir)).filter((name) => /^boss-search_.*\.jsonl$/.test(name)).sort();
 if (!searchFiles.length) throw new Error('No BOSS search snapshots found in raw/');
 const inputFile = path.join(rawDir, searchFiles.at(-1));
 const records = await readJsonl(inputFile);
 const manifest = records.find((record) => record.type === 'manifest') ?? {};
 const slices = records.filter((record) => record.type === 'slice');
+const minSalaryFloorK = Number(manifest.minSalaryFloorK ?? 20);
+const maxSalaryFloorK = Number(manifest.maxSalaryFloorK ?? 40);
+const maxExperienceYears = Number(manifest.maxExperienceYears ?? 5);
 
 const jobsByKey = new Map();
 for (const slice of slices) {
   for (const row of slice.rows ?? []) {
-    const key = row.url || row.securityId || [row.company, row.title, row.salary, row.area].join('|');
-    const source = { query: slice.query, salaryBucket: slice.salaryBucket };
+    const key = positionKey(row);
+    const source = { query: slice.query, salaryBucket: slice.salaryBucket, page: Number(slice.page ?? 1) };
     const existing = jobsByKey.get(key);
     if (existing) {
-      existing.sources.push(source);
+      if (!existing.sources.some((item) => item.query === source.query && item.salaryBucket === source.salaryBucket && item.page === source.page)) existing.sources.push(source);
       existing.resultCount += 1;
-    } else {
-      jobsByKey.set(key, { ...row, sources: [source], resultCount: 1 });
-    }
+      if (Date.parse(slice.collectedAt ?? '') >= Date.parse(existing.searchCollectedAt ?? '')) {
+        Object.assign(existing, row, { searchCollectedAt: slice.collectedAt });
+      }
+    } else jobsByKey.set(key, { ...row, sources: [source], resultCount: 1, searchCollectedAt: slice.collectedAt });
   }
 }
 
@@ -39,6 +59,19 @@ function salaryFloorK(salary) {
   const range = salary.match(/(\d+(?:\.\d+)?)\s*-\s*\d+(?:\.\d+)?\s*K/i);
   if (range) return Number(range[1]);
   const single = salary.match(/(\d+(?:\.\d+)?)\s*K(?:以上|\+)?/i);
+  return single ? Number(single[1]) : null;
+}
+
+function experienceMinimumYears(experience) {
+  const value = String(experience ?? '').trim();
+  if (!value) return null;
+  if (/不限|应届|在校|实习|无经验/.test(value)) return 0;
+  if (/\d+(?:\.\d+)?\s*年\s*(?:以内|以下)/.test(value)) return 0;
+  const range = value.match(/(\d+(?:\.\d+)?)\s*(?:-|~|～|至)\s*\d+(?:\.\d+)?\s*年/);
+  if (range) return Number(range[1]);
+  const minimum = value.match(/(\d+(?:\.\d+)?)\s*年\s*(?:以上|及以上|\+)/);
+  if (minimum) return Number(minimum[1]);
+  const single = value.match(/(\d+(?:\.\d+)?)\s*年/);
   return single ? Number(single[1]) : null;
 }
 
@@ -123,7 +156,7 @@ function writeCsv(rows, columns) {
   return [columns.map(csvCell).join(','), ...rows.map((row) => columns.map((column) => csvCell(row[column])).join(','))].join('\n') + '\n';
 }
 
-const jobs = [...jobsByKey.values()].map((job) => {
+const allJobs = [...jobsByKey.values()].map((job) => {
   const id = String(job.securityId ?? '');
   const record = detailsById.get(id);
   const detail = record?.detail ?? null;
@@ -139,6 +172,7 @@ const jobs = [...jobsByKey.values()].map((job) => {
   const screening = companyScreening(detail, job.company);
   const matchedQueries = [...new Set(job.sources.map((source) => source.query))];
   const salaryBuckets = [...new Set(job.sources.map((source) => source.salaryBucket))];
+  const matchedPages = [...new Set(job.sources.map((source) => source.page))].sort((a, b) => a - b);
   return {
     company: job.company,
     detailCompany: detail?.company,
@@ -176,13 +210,20 @@ const jobs = [...jobsByKey.values()].map((job) => {
     detailSourceFile: record?.sourceFile,
     matchedQueries,
     salaryBuckets,
+    matchedPages,
     resultCount: job.resultCount,
     securityId: job.securityId,
     url: job.url ?? detail?.url,
   };
 }).sort((a, b) => String(a.company).localeCompare(String(b.company), 'zh') || String(a.title).localeCompare(String(b.title), 'zh'));
 
-const eligibleJobs = jobs.filter((job) => job.salaryFloorK !== null && job.salaryFloorK >= 20);
+const jobs = allJobs.filter((job) => {
+  const floor = salaryFloorK(job.salary);
+  const years = experienceMinimumYears(job.experience);
+  return floor !== null && floor >= minSalaryFloorK && floor <= maxSalaryFloorK
+    && (years === null || years <= maxExperienceYears);
+});
+const eligibleJobs = jobs;
 const companiesByName = new Map();
 for (const job of jobs) {
   const name = job.company || '公司名未提供';
@@ -211,13 +252,20 @@ for (const job of jobs) {
 }
 const companies = [...companiesByName.values()].sort((a, b) => a.company.localeCompare(b.company, 'zh'));
 
-const totalRaw = slices.reduce((sum, slice) => sum + (slice.count ?? slice.rows?.length ?? 0), 0);
+const totalRaw = slices.reduce((sum, slice) => sum + (slice.responseCount ?? slice.count ?? slice.rows?.length ?? 0), 0);
+const retainedRows = slices.reduce((sum, slice) => sum + (slice.count ?? slice.rows?.length ?? 0), 0);
+const excludedHits = slices.reduce((total, slice) => {
+  for (const [reason, count] of Object.entries(slice.excluded ?? {})) total[reason] = (total[reason] ?? 0) + count;
+  return total;
+}, {});
+const pagesScanned = [...new Set(slices.map((slice) => Number(slice.page ?? 1)))].sort((a, b) => a - b);
+const paginationSummary = records.find((record) => record.type === 'pagination-summary') ?? null;
 const searchDate = (manifest.collectedAt ?? new Date().toISOString()).slice(0, 10);
 const detailCount = eligibleJobs.filter((job) => job.description).length;
 const shortCount = eligibleJobs.filter((job) => job.detailLevel === 'short-summary').length;
 const requirementCount = eligibleJobs.filter((job) => job.detailedRequirementsProvided).length;
 const missingEligible = eligibleJobs.filter((job) => !job.description);
-const actualSalaryBelow20 = eligibleJobs.filter((job) => salaryFloorK(detailsById.get(String(job.securityId))?.detail?.salary) !== null && salaryFloorK(detailsById.get(String(job.securityId))?.detail?.salary) < 20);
+const outOfScopeUnique = allJobs.length - jobs.length;
 const screeningCandidates = eligibleJobs.filter((job) => job.companyScreeningStatus === '排除候选，待核实');
 
 const technicalTerms = [
@@ -243,11 +291,11 @@ const positionColumns = [
   'company', 'detailCompany', 'companyLegalName', 'title', 'salary', 'salaryFloorK', 'salarySource', 'salaryGate', 'area', 'detailCity', 'address',
   'experience', 'degree', 'skills', 'welfare', 'description', 'detailLevel', 'detailedRequirementsProvided', 'industry', 'companyScale', 'companyStage',
   'companyType', 'companyFoundedDate', 'companyStatus', 'registeredCapital', 'companyIntro', 'companyRelationship', 'companyCertifications',
-  'companyScreeningStatus', 'companyScreeningEvidence', 'detailStatus', 'collectionMethod', 'traceFile', 'detailSourceFile', 'matchedQueries', 'salaryBuckets',
+  'companyScreeningStatus', 'companyScreeningEvidence', 'detailStatus', 'collectionMethod', 'traceFile', 'detailSourceFile', 'matchedQueries', 'salaryBuckets', 'matchedPages',
   'resultCount', 'securityId', 'url',
 ];
 await writeFile(path.join(outDir, 'positions-index.csv'), writeCsv(jobs, [
-  'company', 'title', 'salary', 'salaryFloorK', 'salaryGate', 'area', 'experience', 'degree', 'skills', 'matchedQueries', 'salaryBuckets', 'resultCount', 'securityId', 'url', 'detailStatus', 'companyScreeningStatus',
+  'company', 'title', 'salary', 'salaryFloorK', 'salaryGate', 'area', 'experience', 'degree', 'skills', 'matchedQueries', 'salaryBuckets', 'matchedPages', 'resultCount', 'securityId', 'url', 'detailStatus', 'companyScreeningStatus',
 ]), 'utf8');
 await writeFile(path.join(outDir, 'job-details.csv'), writeCsv(eligibleJobs, positionColumns), 'utf8');
 await writeFile(path.join(outDir, 'companies-index.csv'), writeCsv(companies, [
@@ -259,14 +307,17 @@ const report = `# 深圳 Java 后端与 AI Agent 岗位：数据概览
 > 调研日期：${searchDate} 至 2026-11-27  
 > 关联工作区：[\`job-search\`](../../../README.md)  
 > 招聘来源：Boss 直聘职位页，经本机 OpenCLI 读取；每条职位保留来源 URL。  
-> 统计边界：搜索列表去重后 ${jobs.length} 个职位；下表技能频次仅统计详情已采集的 ${requirementCorpus.length} 个岗位。
+> 统计边界：当前快照纳入薪资下限 20–40K、最低经验要求不超过 5 年的职位；下表技能频次仅统计详情已采集的 ${requirementCorpus.length} 个岗位。
 
 ## 采集覆盖
 
-- 搜索列表：${totalRaw} 条原始结果，${jobs.length} 个去重职位，${companies.length} 个列表公司名称。
-- 列表薪资初筛下限至少 20K 的职位：${eligibleJobs.length} 个；详情描述已采集 ${detailCount} 个，覆盖 ${detailCount}/${eligibleJobs.length}。
+- 搜索接口返回：${totalRaw} 条结果行；按薪资/经验筛选后保留 ${retainedRows} 条命中，职位 ID 去重后 ${jobs.length} 个职位、${companies.length} 个列表公司名称。
+- 范围规则：职位薪资区间下限为 ${minSalaryFloorK}–${maxSalaryFloorK}K；明确最低经验要求超过 ${maxExperienceYears} 年的岗位不纳入索引；不请求薪资下限超过 ${maxSalaryFloorK}K 的薪资档。
+- 搜索结果行过滤次数（包含跨关键词重复）：薪资低于下限 ${excludedHits['salary-below-min'] ?? 0}，薪资下限超过上限 ${excludedHits['salary-above-max'] ?? 0}，薪资无法解析 ${excludedHits['salary-unparsed'] ?? 0}，最低经验超过上限 ${excludedHits['experience-above-max'] ?? 0}。
+- 已读取搜索页：${pagesScanned.length ? pagesScanned.join('、') : '无'}；${paginationSummary ? `分页器状态：${paginationSummary.complete ? '按空页/重复页规则结束' : `未穷尽（页数上限 ${paginationSummary.lastPage}，${paginationSummary.cappedSlices} 个筛选组合触顶）`}` : '该快照没有分页穷尽状态记录'}。
+- 范围内职位：${eligibleJobs.length} 个；详情描述已采集 ${detailCount} 个，覆盖 ${detailCount}/${eligibleJobs.length}。
 - 详情仅有短摘要：${shortCount} 个；详情文本包含明确“任职/岗位/工作要求”段落：${requirementCount} 个。
-- 详情未恢复：${missingEligible.length} 个；详情薪资下限低于 20K：${actualSalaryBelow20.length} 个。
+- 详情未恢复：${missingEligible.length} 个；按职位列表/详情数据核验后有 ${outOfScopeUnique} 个唯一职位不符合当前薪资或经验范围，不纳入职位与详情索引。
 - 公司有“客户公司”或人力资源服务资质证据、列为排除复核候选：${screeningCandidates.length} 个。原始行仍保留；该筛选提示是依据页面证据作出的分析判断，不等于已核验用工关系。
 
 ## 高频要求关键词
@@ -311,9 +362,11 @@ const searchReport = `# 深圳 Java 后端与 AI Agent 岗位：搜索索引
 
 > 采集日期：${searchDate} 至 2026-11-27  
 > 数据源：Boss 直聘搜索切片，经本机 OpenCLI 读取。  
-> 状态：列表索引与第一轮详情索引已生成；职位要求统计见 [\`requirements-summary.md\`](./requirements-summary.md)。
+> 状态：列表索引按职位 ID 幂等去重，并应用薪资/经验过滤；职位要求统计见 [\`requirements-summary.md\`](./requirements-summary.md)。
 
-- 原始搜索结果：${totalRaw} 条；去重后 ${jobs.length} 个职位、${companies.length} 个列表公司名。
+- 搜索结果行：${totalRaw} 条；范围内 ${retainedRows} 条，去重后 ${jobs.length} 个职位、${companies.length} 个列表公司名。
+- 筛选：薪资下限 ${minSalaryFloorK}–${maxSalaryFloorK}K，最低经验要求不超过 ${maxExperienceYears} 年。
+- 已读取页码：${pagesScanned.length ? pagesScanned.join('、') : '无'}；${paginationSummary ? `分页状态：${paginationSummary.complete ? '按终止规则结束' : `未穷尽，${paginationSummary.cappedSlices} 个筛选组合触及页数上限`}` : '无分页终止记录'}。
 - 列表薪资初筛至少 20K：${eligibleJobs.length} 个职位；已获得详情文本 ${detailCount} 个，另有 ${missingEligible.length} 个待核实。
 - 职位列表见 [\`positions-index.csv\`](./positions-index.csv)；详情全文和公司页面字段见 [\`job-details.csv\`](./job-details.csv)；公司汇总见 [\`companies-index.csv\`](./companies-index.csv)。
 - 原始 JSONL 与来源记录见 [\`raw/\`](../raw/)。

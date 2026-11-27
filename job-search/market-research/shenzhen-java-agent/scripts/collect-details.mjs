@@ -36,17 +36,35 @@ const rawDir = path.resolve(one('raw-dir', defaultRawDir));
 const concurrency = Number(one('concurrency', '2'));
 const intervalMs = Number(one('interval-ms', '15000'));
 const requestedMax = Number(one('max-jobs', '0'));
+const minSalaryFloorK = Number(one('min-salary-k', '20'));
+const maxSalaryFloorK = Number(one('max-salary-k', '40'));
+const maxExperienceYears = Number(one('max-experience-years', '5'));
 const outDir = path.resolve(one('out-dir', rawDir));
 
 if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 2) throw new Error('--concurrency must be 1 or 2');
 if (!Number.isInteger(intervalMs) || intervalMs < 10000 || intervalMs > 120000) throw new Error('--interval-ms must be between 10000 and 120000');
 if (!Number.isInteger(requestedMax) || requestedMax < 0) throw new Error('--max-jobs must be zero (all) or a positive integer');
+if (!Number.isFinite(minSalaryFloorK) || !Number.isFinite(maxSalaryFloorK) || minSalaryFloorK > maxSalaryFloorK) throw new Error('Invalid salary floor range');
+if (!Number.isFinite(maxExperienceYears) || maxExperienceYears < 0) throw new Error('--max-experience-years must be a non-negative number');
 
 function salaryFloorK(salary) {
   if (typeof salary !== 'string') return null;
   const range = salary.match(/(\d+(?:\.\d+)?)\s*-\s*\d+(?:\.\d+)?\s*K/i);
   if (range) return Number(range[1]);
   const single = salary.match(/(\d+(?:\.\d+)?)\s*K(?:以上|\+)?/i);
+  return single ? Number(single[1]) : null;
+}
+
+function experienceMinimumYears(experience) {
+  const value = String(experience ?? '').trim();
+  if (!value) return null;
+  if (/不限|应届|在校|实习|无经验/.test(value)) return 0;
+  if (/\d+(?:\.\d+)?\s*年\s*(?:以内|以下)/.test(value)) return 0;
+  const range = value.match(/(\d+(?:\.\d+)?)\s*(?:-|~|～|至)\s*\d+(?:\.\d+)?\s*年/);
+  if (range) return Number(range[1]);
+  const minimum = value.match(/(\d+(?:\.\d+)?)\s*年\s*(?:以上|及以上|\+)/);
+  if (minimum) return Number(minimum[1]);
+  const single = value.match(/(\d+(?:\.\d+)?)\s*年/);
   return single ? Number(single[1]) : null;
 }
 
@@ -207,16 +225,31 @@ const slices = searchLines.filter((line) => line.type === 'slice');
 const jobsByKey = new Map();
 for (const slice of slices) {
   for (const row of slice.rows ?? []) {
-    const key = row.url || row.securityId || [row.company, row.title, row.salary, row.area].join('|');
+    const id = String(row.securityId ?? '').trim();
+    const url = String(row.url ?? '').trim();
+    const key = id ? `id:${id}` : url ? `url:${url.split(/[?#]/, 1)[0].replace(/\/+$/, '')}` : `fields:${[row.company, row.title, row.salary, row.area].map((value) => String(value ?? '').trim()).join('|')}`;
     const existing = jobsByKey.get(key);
-    const source = { query: slice.query, salaryBucket: slice.salaryBucket, searchCollectedAt: slice.collectedAt };
-    if (existing) existing.searchSources.push(source);
+    const source = { query: slice.query, salaryBucket: slice.salaryBucket, page: Number(slice.page ?? 1), searchCollectedAt: slice.collectedAt };
+    if (existing) {
+      if (!existing.searchSources.some((item) => item.query === source.query && item.salaryBucket === source.salaryBucket && item.page === source.page)) existing.searchSources.push(source);
+    }
     else jobsByKey.set(key, { ...row, searchSources: [source] });
   }
 }
 
 const searchUniqueJobs = [...jobsByKey.values()].filter((job) => job.securityId);
-const salaryEligibleJobs = searchUniqueJobs.filter((job) => salaryFloorK(job.salary) !== null && salaryFloorK(job.salary) >= 20);
+const salaryEligibleJobs = searchUniqueJobs.filter((job) => {
+  const floor = salaryFloorK(job.salary);
+  const experienceMinimum = experienceMinimumYears(job.experience);
+  return floor !== null && floor >= minSalaryFloorK && floor <= maxSalaryFloorK
+    && (experienceMinimum === null || experienceMinimum <= maxExperienceYears);
+});
+const belowSalaryFloorSkipped = searchUniqueJobs.filter((job) => salaryFloorK(job.salary) === null || salaryFloorK(job.salary) < minSalaryFloorK).length;
+const aboveSalaryCapSkipped = searchUniqueJobs.filter((job) => salaryFloorK(job.salary) !== null && salaryFloorK(job.salary) > maxSalaryFloorK).length;
+const experienceOverCapSkipped = searchUniqueJobs.filter((job) => {
+  const years = experienceMinimumYears(job.experience);
+  return years !== null && years > maxExperienceYears;
+}).length;
 let jobs = salaryEligibleJobs;
 if (requestedMax > 0) jobs = jobs.slice(0, requestedMax);
 if (!jobs.length) throw new Error('No deduplicated jobs with security IDs were found');
@@ -247,8 +280,13 @@ await appendFile(outFile, `${JSON.stringify({
   collectedAt: new Date().toISOString(),
   inputFile: path.relative(projectRoot, inputFile),
   searchUniqueJobs: searchUniqueJobs.length,
-  belowSalaryFloorSkipped: searchUniqueJobs.length - salaryEligibleJobs.length,
-  selectionRule: 'Only search listings with a displayed salary lower bound of at least 20K are expanded; details still re-verify salary.',
+  belowSalaryFloorSkipped,
+  aboveSalaryCapSkipped,
+  experienceOverCapSkipped,
+  minSalaryFloorK,
+  maxSalaryFloorK,
+  maxExperienceYears,
+  selectionRule: 'Only listings whose displayed salary lower bound is within the configured salary range and whose minimum experience requirement is not above the configured experience limit are expanded; details still re-verify salary and experience.',
   uniqueJobs: jobs.length,
   alreadyCollected: jobs.filter((job) => doneIds.has(String(job.securityId))).length,
   previouslyUnavailable: unavailableIds.size,
