@@ -35,7 +35,8 @@ projects/xiaohongshu/
 ├── 01-research/
 │   ├── xiaohongshu-beginner-guide.md
 │   ├── xhs-deconstruct-and-write.md
-│   └── topic-discovery-and-content-workflow.md
+│   ├── topic-discovery-and-content-workflow.md
+│   └── first-round-topic-discovery-plan.md
 ├── 02-sources/
 │   ├── README.md
 │   └── xhs/
@@ -112,7 +113,7 @@ AI 求职是目前已经探索的一个应用案例，不代表账号主线。�
 
 具体 12 个搜索种子、采集边界和后续筛选方法见[首轮选题发现计划](01-research/first-round-topic-discovery-plan.md)。选题必须进一步落到具体任务、输入和最终交付物；先确定任务，再决定直接模型、现有软件功能、脚本、API 或 Agent 是否合适。
 
-## 六、当前状态
+## 七、当前状态
 
 | 环节 | 状态 | 说明 |
 |---|---|---|
@@ -126,7 +127,7 @@ AI 求职是目前已经探索的一个应用案例，不代表账号主线。�
 | 发布与复盘 | 入口已建立 | 尚无真实发布数据 |
 | 视觉素材 | 部分完成 | 新头像、横幅和贴纸待同步归档 |
 
-## 七、维护规则
+## 八、维护规则
 
 - 不预先设定固定栏目、内容比例或月度排期；
 - 不要求每篇内容使用相同标题、开头、叙事结构或封面模板；
@@ -136,7 +137,7 @@ AI 求职是目前已经探索的一个应用案例，不代表账号主线。�
 - 不把想法写成已验证体验，不编造效果和数据；
 - 只在 test 分支继续更新，未经用户明确授权不合并到 main。
 
-## 八、更新记录
+## 九、更新记录
 
 | 日期 | 变更 | 原因 |
 |---|---|---|
