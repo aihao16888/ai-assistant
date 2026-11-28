@@ -1,9 +1,10 @@
 # AI-PPT-001｜DeepSeek Harness：Everything is a Plugin
 
-- 状态：主题与制作路线已确定；第一阶段研究计划已建立，首轮 Agent 研究尚未执行
+- 状态：阶段 A（研究问题地图）已完成并提交；阶段 B（Cordis Runtime 与 Loader 机制）待执行
 - 所属专题：[AI 做 PPT 专题研究](../../01-research/ai-ppt-series.md)
 - 技术资料：[DeepSeek Harness 文档目录](../../../../docs/deepseek-harness/README.md)
-- 第一阶段计划：[研究计划](./01-stage-one-research-plan.md) · [首轮 Agent 任务说明](./02-first-round-agent-task.md)
+- 研究地图：[阶段 A 问题地图](./00-stage-a-research-map.md)
+- 第一阶段计划：[研究计划](./01-stage-one-research-plan.md) · [AI Agent 研究任务书](./02-first-round-agent-task.md)
 - 关联项目：[小红书运营项目](../../README.md)
 - 创建日期：2026-11-28
 
@@ -313,16 +314,20 @@ HTML 原型通过审核后，再根据已确认的页面结构和视觉规范制
 - 2026-11-28：明确真实任务为 DeepSeek Harness 的 Everything is a Plugin 技术分享；采用 HTML 原型先行、Office PPTX 后续的顺序，并将 28 个笔记标题定位为实践驱动的候选池。
 
 
-## 9. 第一阶段启动状态
+## 9. 研究阶段状态
 
-- 第一阶段定义为“从不了解到能够准确解释 Everything is a Plugin”的研究与知识构建，不等于开始制作 PPT。
-- 已建立 R1–R4 研究路线：概念研究、最小教程理解、真实插件源码追踪、反向讲解验收。
-- 当前只准备执行 R1；R1 的阅读范围限定为官方 README、架构文档、Cordis Primer 和 Tutorial 01–04。
-- R1 完成前不扫描全仓库、不选择最终源码案例、不制作 PPT。
-- 本次更新只建立计划和任务说明，没有执行 R1，也没有形成新的研究结论。
+| 阶段 | 状态 | 说明 |
+|---|---|---|
+| A 问题地图 | 已完成 | 已核验官方固定版本、资料层级、概念边界、源码和测试入口，见 [00-stage-a-research-map.md](./00-stage-a-research-map.md) |
+| B Runtime 机制 | 待执行 | 研究 Cordis Registry、Fiber、Context、Service、inject、Effect、Event 和 Loader |
+| C 真实插件案例 | 待执行 | 比较候选后再选择一个主案例 |
+| D 价值与代价 | 待执行 | 基于 B/C 证据分析，不预先写结论 |
+| E 知识验收 | 待执行 | 反向讲解、架构图和问答验收 |
 
-详见：[第一阶段研究计划](./01-stage-one-research-plan.md) · [R1 Agent 任务说明](./02-first-round-agent-task.md)。
+阶段 A 只建立问题地图和证据入口，不代表已完成源码审查、运行实验或技术结论验收。每个阶段完成后单独审核并提交 test 分支。
+
+详见：[阶段 A 研究地图](./00-stage-a-research-map.md) · [研究计划](./01-stage-one-research-plan.md) · [AI Agent 研究任务书](./02-first-round-agent-task.md)。
 
 ## 更新记录
 
-- 2026-11-28：补充第一阶段研究路线与 R1 执行入口；明确当前只完成计划准备，首轮研究尚未执行。
+- 2026-11-28：完成阶段 A 问题地图；确认官方资料、固定 Commit、核心源码/测试入口及 vendored Cordis 本地修改；将后续路线调整为 A–E 分阶段研究。

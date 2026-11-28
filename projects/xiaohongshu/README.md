@@ -4,7 +4,7 @@
 - 当前账号名称：**Hardy的AI折腾记**（缩短方案待讨论，未改名）
 - 账号简介：见 [00 账号定位](00-account/README.md)
 - 当前定位：**以 AI 应用为导向，把值得了解的 AI 技术讲明白**
-- 当前阶段：AI 做 PPT 首个专题已确定；真实任务为 DeepSeek Harness 的 Everything is a Plugin 技术分享；先做 HTML 原型，审核后制作 Office PPTX；制作过程同步记录，PPT 验收后再筛选小红书笔记。
+- 当前阶段：AI 做 PPT 首个专题已确定；真实任务为 DeepSeek Harness 的 Everything is a Plugin 技术分享。阶段 A 研究问题地图已完成，下一步研究 Cordis Runtime 与 Loader；研究通过后再做 HTML 原型和 Office PPTX。制作过程同步记录，PPT 验收后再筛选小红书笔记。
 - 项目根目录：projects/xiaohongshu/
 
 ## 一、项目入口
@@ -15,14 +15,15 @@
 4. [选题发现、专题研究与内容制作工作流](01-research/topic-discovery-and-content-workflow.md)：从外部信号到发布复盘的核心 SOP；
 5. [首轮选题发现计划](01-research/first-round-topic-discovery-plan.md)：需求发现、实践发现、问题发现三条搜索路径及 12 个搜索种子；
 6. [AI 做 PPT 专题研究](01-research/ai-ppt-series.md)：首个真实任务、双成果关系、28 个候选笔记标题和通用经验提取原则；
-7. [Everything is a Plugin 实践任务书](04-series/AI-PPT-001-everything-is-plugin/brief.md)：本次技术分享的范围、研究问题、HTML→PPTX 制作顺序和验收要求；
-8. [02 外部素材管理](02-sources/README.md)：OpenCLI、平台讨论、官方文档和来源记录；
-9. [日常里的 AI](03-themes/ai-practice/README.md)：内容方向说明；
-10. [候选选题池](03-themes/ai-practice/topic-backlog.md)：经过拆解、去重和初步判断的候选选题；
-11. [真实应用案例池](03-themes/ai-practice/ideas.md)：自己的实际尝试，不是外部帖子收藏夹；
-12. [04 单篇内容制作](04-series/README.md)：研究、案例、脚本和素材；
-13. [05 发布与复盘](05-published/README.md)：记录真实发布情况；
-14. 06-assets/：账号视觉素材和可复用资源。
+7. [Everything is a Plugin 实践任务书](04-series/AI-PPT-001-everything-is-plugin/brief.md)：本次技术分享的范围、研究问题和 HTML→PPTX 制作路线；
+8. [阶段 A 研究问题地图](04-series/AI-PPT-001-everything-is-plugin/00-stage-a-research-map.md)：官方资料、概念边界、源码/测试入口和阶段 B 研究路线；
+9. [02 外部素材管理](02-sources/README.md)：OpenCLI、平台讨论、官方文档和来源记录；
+10. [日常里的 AI](03-themes/ai-practice/README.md)：内容方向说明；
+11. [候选选题池](03-themes/ai-practice/topic-backlog.md)：经过拆解、去重和初步判断的候选选题；
+12. [真实应用案例池](03-themes/ai-practice/ideas.md)：自己的实际尝试，不是外部帖子收藏夹；
+13. [04 单篇内容制作](04-series/README.md)：研究、案例、脚本和素材；
+14. [05 发布与复盘](05-published/README.md)：记录真实发布情况；
+15. 06-assets/：账号视觉素材和可复用资源。
 
 ---
 
@@ -54,7 +55,10 @@ projects/xiaohongshu/
 │   ├── README.md
 │   ├── A-001-jd-pitfall/
 │   └── AI-PPT-001-everything-is-plugin/
-│       └── brief.md
+│       ├── brief.md
+│       ├── 00-stage-a-research-map.md
+│       ├── 01-stage-one-research-plan.md
+│       └── 02-first-round-agent-task.md
 ├── 05-published/
 └── 06-assets/
 ~~~
@@ -127,7 +131,7 @@ AI 求职是目前已经探索的一个应用案例，不代表账号主线。�
 | 外部素材 | A2 和 B1 已试跑 | B1 横比三条查询、30 条不同笔记，优先选 AI 做 PPT。 [热度筛选](02-sources/xhs/b1-heat-screen-2026-11-28.md) |
 | 候选选题 | 首个专题已确定具体任务 | AI 做 PPT 的真实任务确定为 DeepSeek Harness 的 Everything is a Plugin 技术分享；28 个标题是候选笔记池，不是发布配额。 [AI 做 PPT 专题](01-research/ai-ppt-series.md) |
 | 真实案例 | 有一个求职案例 | 需核验真实效果；不是主线或默认首发 |
-| 单篇制作 | 首个实践任务书已建立 | [AI-PPT-001：Everything is a Plugin](04-series/AI-PPT-001-everything-is-plugin/brief.md)；HTML 原型、源码研究和 Office PPTX 均待执行。A-001 保留，是否制作待重新判断 |
+| 单篇制作 | 阶段 A 已完成 | [AI-PPT-001：Everything is a Plugin](04-series/AI-PPT-001-everything-is-plugin/brief.md)；问题地图已提交，Cordis Runtime/Loader 机制研究待执行。HTML 原型和 Office PPTX 尚未开始。A-001 保留，是否制作待重新判断 |
 | 发布与复盘 | 入口已建立 | 尚无真实发布数据 |
 | 视觉素材 | 部分完成 | 新头像、横幅和贴纸待同步归档 |
 
@@ -155,3 +159,4 @@ AI 求职是目前已经探索的一个应用案例，不代表账号主线。�
 | 2026-11-28 | 完成 B1 热度筛选 | 三个方向中 AI 做 PPT 获得最清楚的近期互动信号 |
 | 2026-11-28 | 深化 AI 做 PPT 专题 | 补查实际需求，覆盖多种展示场景、初稿生成、内容表达、页面衔接及图文交付 |
 | 2026-11-28 | 确定 Everything is a Plugin 技术分享为首个真实 PPT 任务 | 先完成专业技术分享，制作过程同步记录，之后将具体经验提炼为可迁移到业绩汇报、项目汇报和培训等场景的小红书笔记 |
+| 2026-11-28 | 完成 AI-PPT-001 阶段 A 研究问题地图 | 核验官方固定版本，扩展资料地图，明确 Cordis Runtime、Loader、产品能力 seam 和真实插件的后续研究入口 |
