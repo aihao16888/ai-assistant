@@ -6,7 +6,7 @@
 - 总体研究路线：[01-stage-one-research-plan.md](./01-stage-one-research-plan.md)
 - 阶段 A 成果：[00-stage-a-research-map.md](./00-stage-a-research-map.md)
 - 阶段 B 成果：[03-research-notes.md](./03-research-notes.md)
-- 当前状态：**任务书已建立；阶段 A、B 已完成；下一项待执行工作为阶段 C**
+- 当前状态：**阶段 A、B 已完成；阶段 C 的 C1 候选比较已完成，推荐 Bash 能力 seam；C2 等待用户确认**
 - 本文件性质：**给 AI Agent 的执行规范，不是研究结论，也不是 PPT 成稿**
 
 ---
@@ -217,7 +217,7 @@
 
 验证边界：读取了固定版本源码和测试断言，但没有在本地运行测试或执行真实运行实验。未验证的并发边界仍标记为 OPEN，不能写成 PASS。
 
-### 阶段 C｜追踪一个真实产品插件（当前唯一待执行阶段）
+### 阶段 C｜追踪一个真实产品插件（C1 已完成；C2 待用户确认）
 
 **目标：** 将阶段 B 的 Cordis 抽象映射到 DeepSeek Harness 的真实产品代码，选择一个最适合技术分享的主案例。
 
@@ -257,6 +257,8 @@
 - 与 Everything is a Plugin 主旨的关联程度。
 
 优先选择：讲解价值高、源码范围可控、证据链完整、无需外部服务即可解释核心机制的案例。比较结果和选择理由必须留档。
+
+C1 已完成，三项候选比较及证据边界见 [04-source-trace.md](./04-source-trace.md)。当前推荐 Bash 能力 seam：以 Base Bundle 实际挂载的 dsh-bash-sandbox 为主线，dsh-bash-local 作为替换对照。C2 尚未开始，等待用户确认。
 
 #### C2. 追踪选定案例的完整链路
 
@@ -373,13 +375,14 @@ A–E 研究通过审核后，再进入演示文稿制作：
 
 ## 11. 当前给 AI Agent 的唯一执行指令
 
-当前任务书已经定义完整研究目标和 A–E 路线。**现在只执行阶段 C：先比较 Bash 三角色组合、LLM Provider Adapter、Agent Loop 三个候选，再选出一个主案例，完成定向源码与测试追踪，输出 `04-source-trace.md`。**
+阶段 A、B 已完成。阶段 C 的 C1 候选比较已完成，结果和证据边界记录在 [04-source-trace.md](./04-source-trace.md)。**当前推荐 Bash 能力 seam；C2 深入追踪须在用户确认后开始。**
 
-不要重新执行阶段 A/B；不要把八份官方文档当成研究上限；不要无差别扫描整个仓库；不要开发插件；不要制作 PPT；不要提前生成小红书笔记；不要自动进入阶段 D。
+确认后，只追踪 Base Bundle 实际挂载的 dsh-bash-sandbox、dsh-shell Service Definition 与 dsh-tool-bash Consumer，并以 dsh-bash-local 作为 Provider 对照。不要重新执行阶段 A/B；不要无差别扫描整个仓库；不要开发插件；不要制作 PPT；不要提前生成小红书笔记；不要自动进入阶段 D。
 
-阶段 C 完成后，提交本阶段成果到 test 分支并停止，等待用户审核。
+C2 完成后补齐 04-source-trace.md，提交阶段 C 成果到 test 分支并停止，等待用户审核。
 
 ## 更新记录
 
 - 2026-11-28：建立首版 AI Agent 研究任务书。
 - 2026-11-28：升级为问题驱动的研究执行规范，明确技术分享与小红书两条成果线、固定版本证据链、A–E 阶段、当前阶段 C 的执行范围、停止条件和分阶段云仓库更新规则。
+- 2026-11-28：C1 候选比较完成，推荐 Bash 能力 seam；更新当前执行指令，等待用户确认后进入 C2。
