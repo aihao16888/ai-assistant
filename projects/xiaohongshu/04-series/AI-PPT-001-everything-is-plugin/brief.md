@@ -1,8 +1,9 @@
 # AI-PPT-001｜DeepSeek Harness：Everything is a Plugin
 
-- 状态：已确定实践主题，尚未开始实际制作
+- 状态：主题与制作路线已确定；第一阶段研究计划已建立，首轮 Agent 研究尚未执行
 - 所属专题：[AI 做 PPT 专题研究](../../01-research/ai-ppt-series.md)
 - 技术资料：[DeepSeek Harness 文档目录](../../../../docs/deepseek-harness/README.md)
+- 第一阶段计划：[研究计划](./01-stage-one-research-plan.md) · [首轮 Agent 任务说明](./02-first-round-agent-task.md)
 - 关联项目：[小红书运营项目](../../README.md)
 - 创建日期：2026-11-28
 
@@ -67,7 +68,7 @@
 6. 对每个重要结论记录来源文件、符号或代码位置；
 7. 将官方明确说明、源码观察、我们的解释和仍未证实的推断分开。
 
-当前 DeepSeek Harness 专题资料记录的官方快照为 4b399c39a6d1479cd84ca591b4d7c88e24d38a96。它是现有资料的引用基线，不自动代表开始制作时的最新版本；实际研究前必须重新核对并决定是否更新固定版本。
+当前 DeepSeek Harness 专题资料记录的历史参考快照为 4b399c39a6d1479cd84ca591b4d7c88e24d38a96。它不自动代表执行当天的最新版本。第一阶段 R1 开始前必须重新核对官方默认分支 HEAD，并冻结本轮唯一 Commit。具体执行范围、轮次和证据规则见[第一阶段研究计划](./01-stage-one-research-plan.md)。
 
 ## 5. PPT 制作路径：HTML 先行，Office 后续
 
@@ -310,3 +311,18 @@ HTML 原型通过审核后，再根据已确认的页面结构和视觉规范制
 
 - 2026-11-28：根据 OpenCLI 搜索和补充素材，确定 AI 做 PPT 为首个专题。
 - 2026-11-28：明确真实任务为 DeepSeek Harness 的 Everything is a Plugin 技术分享；采用 HTML 原型先行、Office PPTX 后续的顺序，并将 28 个笔记标题定位为实践驱动的候选池。
+
+
+## 9. 第一阶段启动状态
+
+- 第一阶段定义为“从不了解到能够准确解释 Everything is a Plugin”的研究与知识构建，不等于开始制作 PPT。
+- 已建立 R1–R4 研究路线：概念研究、最小教程理解、真实插件源码追踪、反向讲解验收。
+- 当前只准备执行 R1；R1 的阅读范围限定为官方 README、架构文档、Cordis Primer 和 Tutorial 01–04。
+- R1 完成前不扫描全仓库、不选择最终源码案例、不制作 PPT。
+- 本次更新只建立计划和任务说明，没有执行 R1，也没有形成新的研究结论。
+
+详见：[第一阶段研究计划](./01-stage-one-research-plan.md) · [R1 Agent 任务说明](./02-first-round-agent-task.md)。
+
+## 更新记录
+
+- 2026-11-28：补充第一阶段研究路线与 R1 执行入口；明确当前只完成计划准备，首轮研究尚未执行。
