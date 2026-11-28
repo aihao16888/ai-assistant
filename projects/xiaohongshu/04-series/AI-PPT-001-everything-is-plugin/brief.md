@@ -1,9 +1,10 @@
 # AI-PPT-001｜DeepSeek Harness：Everything is a Plugin
 
-- 状态：阶段 A（研究问题地图）已完成并提交；阶段 B（Cordis Runtime 与 Loader 机制）待执行
+- 状态：阶段 A 问题地图、阶段 B Cordis Runtime/Loader 源码与测试静态审查均已完成；阶段 C 真实产品插件案例待执行
 - 所属专题：[AI 做 PPT 专题研究](../../01-research/ai-ppt-series.md)
 - 技术资料：[DeepSeek Harness 文档目录](../../../../docs/deepseek-harness/README.md)
 - 研究地图：[阶段 A 问题地图](./00-stage-a-research-map.md)
+- 阶段 B 成果：[Cordis Runtime 与 Loader 研究笔记](./03-research-notes.md)
 - 第一阶段计划：[研究计划](./01-stage-one-research-plan.md) · [AI Agent 研究任务书](./02-first-round-agent-task.md)
 - 关联项目：[小红书运营项目](../../README.md)
 - 创建日期：2026-11-28
@@ -318,16 +319,31 @@ HTML 原型通过审核后，再根据已确认的页面结构和视觉规范制
 
 | 阶段 | 状态 | 说明 |
 |---|---|---|
-| A 问题地图 | 已完成 | 已核验官方固定版本、资料层级、概念边界、源码和测试入口，见 [00-stage-a-research-map.md](./00-stage-a-research-map.md) |
-| B Runtime 机制 | 待执行 | 研究 Cordis Registry、Fiber、Context、Service、inject、Effect、Event 和 Loader |
-| C 真实插件案例 | 待执行 | 比较候选后再选择一个主案例 |
+| A 问题地图 | 已完成 | [00-stage-a-research-map.md](./00-stage-a-research-map.md) |
+| B Runtime 机制 | 已完成（静态审查） | [03-research-notes.md](./03-research-notes.md)；读取源码和测试，未运行本地测试 |
+| C 真实插件案例 | 待执行 | 比较 Bash、LLM Adapter、Agent Loop 后选择一个主案例 |
 | D 价值与代价 | 待执行 | 基于 B/C 证据分析，不预先写结论 |
 | E 知识验收 | 待执行 | 反向讲解、架构图和问答验收 |
 
-阶段 A 只建立问题地图和证据入口，不代表已完成源码审查、运行实验或技术结论验收。每个阶段完成后单独审核并提交 test 分支。
+阶段 A 建立了问题地图；阶段 B 已完成固定版本源码与测试的静态审查，但没有运行本地测试或实验。每个阶段完成后单独审核并提交 test 分支。
 
 详见：[阶段 A 研究地图](./00-stage-a-research-map.md) · [研究计划](./01-stage-one-research-plan.md) · [AI Agent 研究任务书](./02-first-round-agent-task.md)。
 
 ## 更新记录
 
 - 2026-11-28：完成阶段 A 问题地图；确认官方资料、固定 Commit、核心源码/测试入口及 vendored Cordis 本地修改；将后续路线调整为 A–E 分阶段研究。
+
+
+## 10. 阶段 B 研究结果
+
+- 已追踪 Plugin / Registry / Runtime / Fiber 的关系；
+- 已核对 Context、Service、inject、服务作用域和 Provider/Consumer teardown；
+- 已核对 Effect 所有权、Event 分发模式和 Loader Entry 创建流程；
+- 已读取固定版本相关测试断言，特别是 Provider 替换、FAILED 恢复和异步资源释放；
+- 未在本地执行测试，未进行真实运行实验；V6 重入卸载等并发边界保留 OPEN。
+
+详细结论见 [03-research-notes.md](./03-research-notes.md)。下一步进入阶段 C，比较真实产品插件案例。
+
+## 更新记录
+
+- 2026-11-28：完成阶段 B 源码与测试静态审查；更新研究状态，进入真实产品插件案例选择阶段。

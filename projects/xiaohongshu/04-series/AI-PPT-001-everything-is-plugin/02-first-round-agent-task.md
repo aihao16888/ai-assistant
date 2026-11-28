@@ -3,8 +3,9 @@
 - 更新日期：2026-11-28
 - 项目：[AI-PPT-001｜DeepSeek Harness：Everything is a Plugin](./brief.md)
 - 总体计划：[01-stage-one-research-plan.md](./01-stage-one-research-plan.md)
-- 已完成阶段：[00-stage-a-research-map.md](./00-stage-a-research-map.md)
-- 当前待执行：**阶段 B｜Cordis Runtime 与 Loader 机制研究**
+- 阶段 A 成果：[00-stage-a-research-map.md](./00-stage-a-research-map.md)
+- 阶段 B 成果：[03-research-notes.md](./03-research-notes.md)
+- 当前待执行：**阶段 C｜真实产品插件案例比较与追踪**
 
 ---
 
@@ -28,10 +29,10 @@
 ## 2. 输入资料
 
 开始任何阶段前，先阅读：
-
 1. brief.md：真实任务、分享目标和范围；
 2. 01-stage-one-research-plan.md：A–E 阶段路线、退出条件和提交规则；
-3. 00-stage-a-research-map.md：已经核验的官方资料、概念边界、源码/测试入口和待研究问题。
+3. 00-stage-a-research-map.md：官方资料、概念边界、源码/测试入口；
+4. 03-research-notes.md：已核实的 Cordis Runtime 与 Loader 机制。
 
 官方仓库：
 - https://github.com/deepseek-ai/deepseek-harness
@@ -39,7 +40,7 @@
 本次固定 Commit：
 - 4b399c39a6d1479cd84ca591b4d7c88e24d38a96
 
-所有官方文档、源码、测试链接必须固定到该 Commit。不要使用浮动的 master 链接作为证据。不要混用不同 Commit 的文档和代码。
+所有官方文档、源码、测试链接必须固定到该 Commit。不要使用浮动的 master 链接作为证据，不要混用不同 Commit 的文档和代码。
 
 ## 3. 研究方法
 
@@ -49,23 +50,13 @@
 2. 从官方文档/API 参考找到概念和契约；
 3. 从固定 Commit 源码定位真实实现；
 4. 从对应测试检查边界行为和失败场景；
-5. 只有文档、源码和测试仍无法回答时，才设计最小运行实验；
+5. 只有文档、源码、测试仍无法回答时，才设计最小运行实验；
 6. 用自己的语言解释结论；
 7. 标明证据不能证明什么，保留仍然开放的问题。
 
 资料范围可以扩展，但每次扩展都必须说明它回答了哪个问题。禁止为了“读完整个仓库”而扫描 26,160 个路径。
 
-## 4. 研究范围与关键区别
-
-### 4.1 研究主线
-
-- Cordis Plugin、Context、Service、inject、Event、Effect、Fiber；
-- Loader、插件树、配置项、Group/Include 和 HMR；
-- Profile、Bundle、Patch 如何组成运行环境；
-- Harness 的真实能力如何通过 Service Definition / Provider / Consumer 组织；
-- 一个真实内置插件的加载、依赖、能力注册和卸载。
-
-### 4.2 必须避免的概念混淆
+## 4. 必须避免的概念混淆
 
 - Plugin 不等于 Service；
 - Plugin 不等于 npm package；
@@ -77,196 +68,110 @@
 - inject 不等于普通静态 import；
 - Event 不等于所有插件协作的唯一机制；
 - Cordis 不等于 Agent Loop、MCP 或操作系统沙箱；
-- Effect 清理不等于自动回滚数据库事务或外部业务操作。
+- Effect 清理不等于自动回滚数据库事务或外部业务操作；
+- ctx.get 的可选查询不等于 inject 的响应式依赖。
 
-### 4.3 不做的事情
+## 5. 研究阶段与当前任务
 
-- 不修改 DeepSeek Harness 上游仓库；
-- 不开发一个正式产品插件；
-- 不把整个 Harness 所有子系统都纳入本次 PPT；
-- 不为了展示 Agent 能力加入无关的 MCP、Java 或企业案例；
-- 不提前生成 PPT 页面；
-- 不把推断写成官方事实；
-- 不把没有运行的实验写成“已实测”。
-
-如果需要动手验证，只能在本地临时目录创建最小示例，不改上游仓库；优先使用无需 API Key 的教程示例。
-
-## 5. 分阶段任务
-
-### 阶段 A｜问题地图（已完成，不要重复执行）
+### 阶段 A｜问题地图（已完成）
 
 产出：00-stage-a-research-map.md。
 
-已经完成：
-- 固定版本核验；
-- 官方资料分层；
-- 概念边界初步模型；
-- 源码与测试入口；
-- 真实插件候选；
-- 后续研究问题。
+### 阶段 B｜Cordis Runtime 与 Loader（已完成，静态审查）
 
-如发现新证据与地图冲突，先记录差异，再在相应阶段修订，不要无声覆盖。
+产出：03-research-notes.md。
 
-### 阶段 B｜Cordis Runtime 与 Loader 机制（当前唯一执行任务）
+已核实 Plugin / Registry / Fiber、Context / Service / inject、Effect、Event、Loader 入口和测试断言。未执行本地测试；不要把静态审查写成运行 PASS。
 
-**目标：** 从源码和测试中还原插件从声明、加载、依赖等待、激活、运行到卸载的机制。
+### 阶段 C｜真实产品插件案例（当前唯一执行任务）
 
-#### B1. Plugin、Registry、Fiber
+**目标：** 把阶段 B 的 Cordis 抽象映射到 DeepSeek Harness 的真实产品代码，选出一个最适合技术分享的主案例。
 
-优先研究：
-- vendor/cordis/src/registry.ts
-- vendor/cordis/src/fiber.ts
-- vendor/cordis/src/context.ts
+候选：
 
-回答：
-- Plugin 支持哪些入口形态？
-- ctx.plugin() 如何创建运行实例？
-- Registry 负责什么，Fiber 负责什么？
-- apply(ctx) 何时执行？
-- 插件配置何时校验？
-- Fiber 状态如何变化？
-- 插件加载失败和配置失败分别如何表现？
+1. **Bash 三角色组合**
+   - dsh-shell：Service Definition；
+   - dsh-bash-local：Provider；
+   - dsh-tool-bash：Consumer。
+   - 优势：直观展示接口、实现、消费者分离，以及替换 Provider 后 Consumer 不必改变。
+   - 风险：涉及三个角色，不应误讲成一个插件文件。
 
-#### B2. Context、Service 与 inject
+2. **LLM Provider Adapter**
+   - 例如 dsh-llm-pi-ai；
+   - 优势：展示模型适配器如何接入统一 LLM 服务。
+   - 风险：协议、模型路由和凭据细节可能分散主题。
 
-优先研究：
-- vendor/cordis/src/context.ts
-- vendor/cordis/src/service.ts
-- vendor/cordis/src/reflect.ts
-- vendor/cordis/src/registry.ts
+3. **Agent Loop**
+   - dsh-agent-loop；
+   - 优势：能直接证明 Agent Loop 这样的核心产品能力也可以是插件。
+   - 风险：核心依赖多、实现范围大，容易变成 Agent Loop 专题。
 
-回答：
-- Context 如何解析 ctx 上的服务属性？
-- Service 如何注册和注销？
-- inject 如何表达硬依赖？
-- 缺少 Provider 时 Fiber 处于什么状态？
-- Provider 后出现、消失或替换时，Consumer 如何处理？
-- 可选依赖与服务隔离如何工作？
-- 服务名称和多个 Provider 有哪些约束？
+4. **Tutorial greet-tool**
+   - 优势：最小示例，适合辅助解释；
+   - 风险：不是实际产品插件，不应替代真实产品案例。
 
-#### B3. Effect、Fiber dispose 与所有权
+#### C1. 先做候选比较
 
-优先研究：
-- vendor/cordis/src/fiber.ts
-- vendor/cordis/src/registry.ts
-- vendor/README.md 中与本次机制有关的本地修改
+比较每个候选：
+- 配置入口和实际挂载方式；
+- 插件入口形态；
+- inject 依赖数量和依赖关系；
+- 提供/消费哪些 Service；
+- 注册哪些能力；
+- 生命周期和清理逻辑；
+- 相关测试数量及关键断言；
+- 需要阅读的核心文件数量；
+- 能否用一张图讲清楚；
+- 是否需要真实 API Key 或外部服务。
 
-回答：
-- 哪些 Cordis API 注册会自动成为 Effect？
-- ctx.effect() 如何接管外部资源？
-- disposer 何时运行，如何等待异步清理？
-- 父插件与子插件如何建立所有权？
-- 重入式卸载、卸载期间新增 Effect、清理失败会怎样？
-- 哪些行为受 Harness 本地 V6 / V25 等修改影响？
+不要只按代码复杂度或“核心程度”选择。优先选择讲解价值高、源码范围可控、测试证据完整的案例。
 
-#### B4. Event
+#### C2. 选定主案例后追踪完整链路
 
-优先研究：
-- vendor/cordis/src/events.ts
-- docs/cordis-tutorial/04-events.zh.md
-- docs/cordis-api/events.zh.md
+至少追踪：
+1. 产品组合配置中该插件从哪里进入；
+2. Loader 如何导入并创建 Fiber；
+3. 插件声明了哪些依赖；
+4. 依赖服务由谁提供；
+5. 插件如何注册或消费能力；
+6. 运行时其他插件如何调用它；
+7. 插件卸载或 Provider 替换时发生什么；
+8. 测试如何验证关键行为。
 
-回答：
-- emit、parallel、serial、bail、waterfall 的语义差异；
-- ctx.on() 的监听器所有权和 disposer；
-- 哪些事件适合通知，哪些适合决策拦截；
-- waterfall 忘记调用 next() 会发生什么？
+必须区分：
+- Cordis 框架负责的通用机制；
+- Harness 产品层负责的组合逻辑；
+- 案例插件自己的业务实现。
 
-#### B5. Loader 与插件树
+#### C3. 输出
 
-优先研究：
-- vendor/loader/src/index.ts
-- vendor/loader/src/config/entry.ts
-- vendor/loader/src/config/tree.ts
-- 需要时读取 group.ts、isolate.ts
-- packages/boot/app-boot/src/profile.ts
+创建 04-source-trace.md，至少包含：
+- 固定 Commit；
+- 候选比较表；
+- 最终案例和选择理由；
+- 产品组合配置入口；
+- 关键源码文件与符号；
+- 插件依赖图；
+- 加载、注册、消费和卸载调用链；
+- 相关测试及其实际断言；
+- 仍未验证的行为；
+- 适合技术分享的案例讲解方式。
 
-回答：
-- cordis.yml 中的一条配置如何成为插件实例？
-- Loader 如何解析模块、校验 Config 和跟踪 Entry？
-- Group、Include、Patch 分别负责什么？
-- 配置变化如何触发更新或重新挂载？
-- HMR 的范围和限制是什么？
+**C 阶段不要制作 PPT，不要新增插件，不要把所有候选都深入到底。**
 
-#### B6. 测试证据
+C 阶段完成后暂停，先审核并单独提交 test 分支。
 
-先读与具体问题对应的测试，不要一开始运行全仓库测试：
-- scripts/cordis-core-lifecycle.spec.ts
-- scripts/cordis-core-api.spec.ts
-- scripts/cordis-loader-resolve.spec.ts
-- packages/boot/app-boot/tests/user-patches.spec.ts
+### 阶段 D｜设计价值与代价分析（待执行）
 
-如发现某条结论缺少测试覆盖，明确标记，不要把测试文件存在本身当作行为已证明。
+使用 B/C 已确认的证据分析插件组合、依赖协调、生命周期、事件扩展、调试和维护成本。没有基准数据时不声称性能或效率提升。
 
-**B 阶段产出：**
-- 创建或更新 03-research-notes.md；
-- 写出插件加载与卸载流程；
-- 写出服务依赖变化流程；
-- 写出 Effect 所有权与清理流程；
-- 写出 Event 分发对照；
-- 每个关键结论带固定 Commit 源码和测试证据；
-- 标记未验证和需要运行实验的问题。
+### 阶段 E｜反向讲解和知识验收（待执行）
 
-B 阶段完成后暂停扩展，先审核结论，再单独提交 test 分支。
-
-### 阶段 C｜真实产品插件追踪
-
-**目标：** 从产品代码中选一个主案例，验证 Cordis 机制如何支撑真实能力。
-
-候选见 00-stage-a-research-map.md：
-- Tutorial greet-tool；
-- Bash 三角色组合；
-- LLM Provider Adapter；
-- Agent Loop。
-
-比较标准：
-- 是否能说明 Everything is a Plugin；
-- 依赖关系是否清晰；
-- 源码范围是否可控；
-- 是否有对应测试；
-- 是否可以说明加载、依赖、提供能力、卸载；
-- 是否适合 15–20 分钟技术分享。
-
-不要预先认定 Agent Loop 必然最好，也不要为了案例数量同时深入多个大型子系统。
-
-**C 阶段产出：** 04-source-trace.md，包含候选比较、选择理由、配置入口、关键文件、符号、调用链、依赖图、测试证据和局限。
-
-### 阶段 D｜设计价值与代价分析
-
-**目标：** 用已核实的 B/C 证据回答“为什么这样设计”和“付出了什么代价”。
-
-分析：
-- 插件组合与配置替换解决了什么问题；
-- Service Definition / Provider / Consumer 分离带来什么变化；
-- inject 与生命周期协调怎样减少手工依赖管理；
-- Effect/disposer 怎样约束副作用所有权；
-- Event 怎样支持松耦合扩展；
-- 依赖等待、PENDING、服务命名、调试、版本兼容和 HMR 带来哪些复杂度。
-
-将官方设计说明、源码事实、测试事实和工程分析分开。没有性能或效率基准时，不得声称插件化提升了性能或开发效率。
-
-**D 阶段产出：** 更新 03-research-notes.md，加入收益、代价、适用边界和证据对照。
-
-### 阶段 E｜反向讲解和知识验收
-
-**目标：** 验证研究者是否真的理解。
-
-必须能：
-- 用 3–5 分钟解释 Everything is a Plugin；
-- 画出实际架构关系图；
-- 用真实插件解释加载、依赖、注册和卸载；
-- 解释 Provider 替换；
-- 解释设计收益、代价和边界；
-- 对核心结论指出源码/测试位置。
-
-无法回答的问题返回证据链补查。不能靠生成一段更流畅的文字掩盖理解缺口。
-
-**E 阶段产出：** 更新 03-research-notes.md，记录通俗讲解、架构图、提问与回答、验收结果和仍开放的问题。
+用 3–5 分钟通俗讲解、架构图、真实案例和问答检验理解。无法回答的问题回到证据链补查。
 
 ## 6. 证据规范
 
 每个重要结论必须标记：
-
 - OFFICIAL：官方文档直接说明；
 - SOURCE：固定 Commit 源码直接证明；
 - TEST：固定 Commit 测试断言覆盖；
@@ -274,14 +179,7 @@ B 阶段完成后暂停扩展，先审核结论，再单独提交 test 分支。
 - ANALYSIS：基于证据形成的工程解释；
 - OPEN：证据不足或存在歧义。
 
-每条记录包含：
-- 结论；
-- 证据等级；
-- 文件路径；
-- 章节/符号/行号；
-- 固定 Commit URL；
-- 证据支持的范围；
-- 不能据此推断的内容。
+每条记录包含结论、证据等级、文件路径、章节/符号/行号、固定 Commit URL、证据支持范围和不能推断的内容。
 
 禁止：
 - 只贴仓库目录而不指向具体位置；
@@ -305,8 +203,6 @@ B 阶段完成后暂停扩展，先审核结论，再单独提交 test 分支。
 
 ## 8. 当前执行指令
 
-**现在只执行阶段 B。**
+**现在只执行阶段 C。**
 
-不要重新执行阶段 A，不要直接跳到阶段 C，不要开发插件，不要制作 PPT。
-
-先从 Registry / Fiber / Context / Service / inject 开始，按问题需要扩展到 Event、Loader 和测试。完成 B 阶段研究笔记并审核后，再决定阶段 C 的真实插件案例。
+先比较候选，选出一个主案例，再对它做定向源码与测试追踪。不要重新执行阶段 A/B，不要同时深入多个大型子系统，不要开发插件，不要制作 PPT。
