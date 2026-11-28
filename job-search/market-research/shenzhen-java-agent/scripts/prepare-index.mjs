@@ -4,6 +4,8 @@
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { employerExclusionReason } from './screening.mjs';
+import { DEFAULT_SCOPE, experienceRangeYears, salaryRangeK, scopeExclusionReasons } from './scope.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(here, '..');
@@ -34,9 +36,8 @@ const inputFile = path.join(rawDir, searchFiles.at(-1));
 const records = await readJsonl(inputFile);
 const manifest = records.find((record) => record.type === 'manifest') ?? {};
 const slices = records.filter((record) => record.type === 'slice');
-const minSalaryFloorK = Number(manifest.minSalaryFloorK ?? 20);
-const maxSalaryFloorK = Number(manifest.maxSalaryFloorK ?? 40);
-const maxExperienceYears = Number(manifest.maxExperienceYears ?? 5);
+const { minSalaryK, maxSalaryK, maxExperienceYears } = DEFAULT_SCOPE;
+const scope = DEFAULT_SCOPE;
 
 const jobsByKey = new Map();
 for (const slice of slices) {
@@ -52,27 +53,6 @@ for (const slice of slices) {
       }
     } else jobsByKey.set(key, { ...row, sources: [source], resultCount: 1, searchCollectedAt: slice.collectedAt });
   }
-}
-
-function salaryFloorK(salary) {
-  if (typeof salary !== 'string') return null;
-  const range = salary.match(/(\d+(?:\.\d+)?)\s*-\s*\d+(?:\.\d+)?\s*K/i);
-  if (range) return Number(range[1]);
-  const single = salary.match(/(\d+(?:\.\d+)?)\s*K(?:以上|\+)?/i);
-  return single ? Number(single[1]) : null;
-}
-
-function experienceMinimumYears(experience) {
-  const value = String(experience ?? '').trim();
-  if (!value) return null;
-  if (/不限|应届|在校|实习|无经验/.test(value)) return 0;
-  if (/\d+(?:\.\d+)?\s*年\s*(?:以内|以下)/.test(value)) return 0;
-  const range = value.match(/(\d+(?:\.\d+)?)\s*(?:-|~|～|至)\s*\d+(?:\.\d+)?\s*年/);
-  if (range) return Number(range[1]);
-  const minimum = value.match(/(\d+(?:\.\d+)?)\s*年\s*(?:以上|及以上|\+)/);
-  if (minimum) return Number(minimum[1]);
-  const single = value.match(/(\d+(?:\.\d+)?)\s*年/);
-  return single ? Number(single[1]) : null;
 }
 
 function requirementStatus(detail) {
@@ -112,6 +92,7 @@ function compareScore(a, b) {
 const detailFiles = (await readdir(rawDir)).filter((name) => /^boss-details[-_].*\.jsonl$/.test(name)).sort();
 const detailsById = new Map();
 const errorsById = new Map();
+const employerFiltersById = new Map();
 let detailRows = 0;
 for (const name of detailFiles) {
   const file = path.join(rawDir, name);
@@ -123,6 +104,8 @@ for (const name of detailFiles) {
       const candidate = { ...record, sourceFile: name };
       const current = detailsById.get(key);
       if (!current || compareScore(candidate, current) > 0) detailsById.set(key, candidate);
+    } else if (record.type === 'filtered' && record.search?.securityId) {
+      employerFiltersById.set(String(record.search.securityId), record);
     } else if (['error', 'unavailable'].includes(record.type) && id) {
       const list = errorsById.get(id) ?? [];
       list.push(record);
@@ -160,11 +143,26 @@ const allJobs = [...jobsByKey.values()].map((job) => {
   const id = String(job.securityId ?? '');
   const record = detailsById.get(id);
   const detail = record?.detail ?? null;
-  const listedFloor = salaryFloorK(job.salary);
-  const actualFloor = salaryFloorK(detail?.salary);
-  const floor = actualFloor ?? listedFloor;
-  const salarySource = actualFloor != null ? '职位详情页' : listedFloor != null ? '搜索列表（待详情复核）' : '无法解析';
-  const salaryGate = floor == null ? '待核薪资' : floor < 20 ? '不满足下限' : actualFloor != null ? '详情薪资通过' : '列表薪资初筛通过';
+  const storedFilter = employerFiltersById.get(id);
+  const employerFilterReason = storedFilter?.reason ?? employerExclusionReason({
+    ...job,
+    detailCompany: detail?.company,
+    companyLegalName: detail?.companyLegalName,
+    companyType: detail?.companyType,
+    companyCertifications: detail?.companyCertifications,
+  });
+  const salary = detail?.salary ?? job.salary;
+  const experience = detail?.experience ?? job.experience;
+  const salaryRange = salaryRangeK(salary);
+  const experienceRange = experienceRangeYears(experience);
+  const scopeReasons = scopeExclusionReasons({ salary, experience }, scope);
+  const listedSalaryRange = salaryRangeK(job.salary);
+  const actualSalaryRange = salaryRangeK(detail?.salary);
+  const salarySource = actualSalaryRange != null ? '职位详情页' : listedSalaryRange != null ? '搜索列表（待详情复核）' : '无法解析';
+  const salaryGate = scopeReasons.includes('salary-unparsed') ? '薪资范围无法解析'
+    : scopeReasons.includes('salary-below-min') ? '薪资区间下限低于 20K'
+      : scopeReasons.includes('salary-above-max') ? '薪资区间上限超过 40K'
+        : actualSalaryRange != null ? '详情薪资范围通过' : '列表薪资范围初筛通过';
   const statusErrors = errorsById.get(id) ?? [];
   const detailStatus = detail
     ? detailCompleteness(detail) === 'short-summary' ? '仅短摘要，未提供完整任职要求' : requirementStatus(detail) ? '详情及要求已采集' : '详情已采集，未识别到任职要求段落'
@@ -178,14 +176,17 @@ const allJobs = [...jobsByKey.values()].map((job) => {
     detailCompany: detail?.company,
     companyLegalName: detail?.companyLegalName,
     title: job.title,
-    salary: detail?.salary ?? job.salary,
-    salaryFloorK: floor,
+    salary,
+    salaryFloorK: salaryRange?.[0],
+    salaryCeilingK: salaryRange ? Number.isFinite(salaryRange[1]) ? salaryRange[1] : '无上限' : null,
     salarySource,
     salaryGate,
     area: job.area,
     detailCity: detail?.city,
     address: detail?.address,
-    experience: detail?.experience ?? job.experience,
+    experience,
+    experienceCeilingYears: experienceRange ? Number.isFinite(experienceRange[1]) ? experienceRange[1] : '无上限' : null,
+    scopeExclusionReason: scopeReasons.join(';'),
     degree: detail?.degree ?? job.degree,
     skills: detail?.skills ?? job.skills,
     welfare: detail?.welfare,
@@ -205,6 +206,7 @@ const allJobs = [...jobsByKey.values()].map((job) => {
     companyScreeningStatus: screening.status,
     companyScreeningEvidence: screening.evidence,
     detailStatus,
+    employerFilterReason,
     collectionMethod: record?.collectionMethod ?? 'OpenCLI adapter output',
     traceFile: record?.traceFile,
     detailSourceFile: record?.sourceFile,
@@ -217,12 +219,14 @@ const allJobs = [...jobsByKey.values()].map((job) => {
   };
 }).sort((a, b) => String(a.company).localeCompare(String(b.company), 'zh') || String(a.title).localeCompare(String(b.title), 'zh'));
 
-const jobs = allJobs.filter((job) => {
-  const floor = salaryFloorK(job.salary);
-  const years = experienceMinimumYears(job.experience);
-  return floor !== null && floor >= minSalaryFloorK && floor <= maxSalaryFloorK
-    && (years === null || years <= maxExperienceYears);
-});
+const scopeExcludedJobs = allJobs
+  .filter((job) => job.scopeExclusionReason)
+  .map((job) => ({ ...job, exclusionReason: job.scopeExclusionReason }));
+const salaryExperienceEligibleJobs = allJobs.filter((job) => !job.scopeExclusionReason);
+const excludedEmployerJobs = salaryExperienceEligibleJobs
+  .filter((job) => job.employerFilterReason)
+  .map((job) => ({ ...job, exclusionReason: job.employerFilterReason }));
+const jobs = salaryExperienceEligibleJobs.filter((job) => !job.employerFilterReason);
 const eligibleJobs = jobs;
 const companiesByName = new Map();
 for (const job of jobs) {
@@ -253,11 +257,14 @@ for (const job of jobs) {
 const companies = [...companiesByName.values()].sort((a, b) => a.company.localeCompare(b.company, 'zh'));
 
 const totalRaw = slices.reduce((sum, slice) => sum + (slice.responseCount ?? slice.count ?? slice.rows?.length ?? 0), 0);
-const retainedRows = slices.reduce((sum, slice) => sum + (slice.count ?? slice.rows?.length ?? 0), 0);
-const excludedHits = slices.reduce((total, slice) => {
-  for (const [reason, count] of Object.entries(slice.excluded ?? {})) total[reason] = (total[reason] ?? 0) + count;
-  return total;
-}, {});
+const recordedSearchRows = slices.flatMap((slice) => slice.rows ?? []);
+const excludedHits = {};
+let retainedRows = 0;
+for (const row of recordedSearchRows) {
+  const reasons = scopeExclusionReasons(row, scope);
+  if (!reasons.length) retainedRows += 1;
+  for (const reason of reasons) excludedHits[reason] = (excludedHits[reason] ?? 0) + 1;
+}
 const pagesScanned = [...new Set(slices.map((slice) => Number(slice.page ?? 1)))].sort((a, b) => a - b);
 const paginationSummary = records.find((record) => record.type === 'pagination-summary') ?? null;
 const searchDate = (manifest.collectedAt ?? new Date().toISOString()).slice(0, 10);
@@ -265,8 +272,9 @@ const detailCount = eligibleJobs.filter((job) => job.description).length;
 const shortCount = eligibleJobs.filter((job) => job.detailLevel === 'short-summary').length;
 const requirementCount = eligibleJobs.filter((job) => job.detailedRequirementsProvided).length;
 const missingEligible = eligibleJobs.filter((job) => !job.description);
-const outOfScopeUnique = allJobs.length - jobs.length;
+const scopeExcludedUnique = scopeExcludedJobs.length;
 const screeningCandidates = eligibleJobs.filter((job) => job.companyScreeningStatus === '排除候选，待核实');
+const excludedEmployerHitRows = slices.reduce((count, slice) => count + (slice.rows ?? []).filter((row) => employerExclusionReason(row)).length, 0);
 
 const technicalTerms = [
   ['Java', /\bJava\b/i],
@@ -288,18 +296,24 @@ const requirementCorpus = eligibleJobs.filter((job) => job.description);
 const termCounts = technicalTerms.map(([term, pattern]) => ({ term, count: requirementCorpus.filter((job) => pattern.test(`${job.description ?? ''} ${job.skills ?? ''}`)).length }));
 
 const positionColumns = [
-  'company', 'detailCompany', 'companyLegalName', 'title', 'salary', 'salaryFloorK', 'salarySource', 'salaryGate', 'area', 'detailCity', 'address',
-  'experience', 'degree', 'skills', 'welfare', 'description', 'detailLevel', 'detailedRequirementsProvided', 'industry', 'companyScale', 'companyStage',
+  'company', 'detailCompany', 'companyLegalName', 'title', 'salary', 'salaryFloorK', 'salaryCeilingK', 'salarySource', 'salaryGate', 'area', 'detailCity', 'address',
+  'experience', 'experienceCeilingYears', 'scopeExclusionReason', 'degree', 'skills', 'welfare', 'description', 'detailLevel', 'detailedRequirementsProvided', 'industry', 'companyScale', 'companyStage',
   'companyType', 'companyFoundedDate', 'companyStatus', 'registeredCapital', 'companyIntro', 'companyRelationship', 'companyCertifications',
   'companyScreeningStatus', 'companyScreeningEvidence', 'detailStatus', 'collectionMethod', 'traceFile', 'detailSourceFile', 'matchedQueries', 'salaryBuckets', 'matchedPages',
   'resultCount', 'securityId', 'url',
 ];
 await writeFile(path.join(outDir, 'positions-index.csv'), writeCsv(jobs, [
-  'company', 'title', 'salary', 'salaryFloorK', 'salaryGate', 'area', 'experience', 'degree', 'skills', 'matchedQueries', 'salaryBuckets', 'matchedPages', 'resultCount', 'securityId', 'url', 'detailStatus', 'companyScreeningStatus',
+  'company', 'title', 'salary', 'salaryFloorK', 'salaryCeilingK', 'salaryGate', 'area', 'experience', 'experienceCeilingYears', 'degree', 'skills', 'matchedQueries', 'salaryBuckets', 'matchedPages', 'resultCount', 'securityId', 'url', 'detailStatus', 'companyScreeningStatus',
 ]), 'utf8');
 await writeFile(path.join(outDir, 'job-details.csv'), writeCsv(eligibleJobs, positionColumns), 'utf8');
 await writeFile(path.join(outDir, 'companies-index.csv'), writeCsv(companies, [
   'company', 'postingCount', 'titles', 'salaryRanges', 'matchedQueries', 'officialNames', 'industries', 'scales', 'stages', 'screeningStatuses', 'screeningEvidence', 'identityStatus', 'postingUrls',
+]), 'utf8');
+await writeFile(path.join(outDir, 'excluded-postings.csv'), writeCsv(excludedEmployerJobs, [
+  'company', 'title', 'salary', 'experience', 'exclusionReason', 'securityId', 'url',
+]), 'utf8');
+await writeFile(path.join(outDir, 'scope-excluded-postings.csv'), writeCsv(scopeExcludedJobs, [
+  'company', 'title', 'salary', 'salaryFloorK', 'salaryCeilingK', 'experience', 'experienceCeilingYears', 'exclusionReason', 'securityId', 'url',
 ]), 'utf8');
 
 const report = `# 深圳 Java 后端与 AI Agent 岗位：数据概览
@@ -307,18 +321,19 @@ const report = `# 深圳 Java 后端与 AI Agent 岗位：数据概览
 > 调研日期：${searchDate} 至 2026-11-27  
 > 关联工作区：[\`job-search\`](../../../README.md)  
 > 招聘来源：Boss 直聘职位页，经本机 OpenCLI 读取；每条职位保留来源 URL。  
-> 统计边界：当前快照纳入薪资下限 20–40K、最低经验要求不超过 5 年的职位；下表技能频次仅统计详情已采集的 ${requirementCorpus.length} 个岗位。
+> 统计边界：仅纳入职位标示的整段月薪范围在 20–40K 内、经验年限上限不超过 5 年的岗位；下表技能频次仅统计详情已采集的 ${requirementCorpus.length} 个岗位。
 
 ## 采集覆盖
 
-- 搜索接口返回：${totalRaw} 条结果行；按薪资/经验筛选后保留 ${retainedRows} 条命中，职位 ID 去重后 ${jobs.length} 个职位、${companies.length} 个列表公司名称。
-- 范围规则：职位薪资区间下限为 ${minSalaryFloorK}–${maxSalaryFloorK}K；明确最低经验要求超过 ${maxExperienceYears} 年的岗位不纳入索引；不请求薪资下限超过 ${maxSalaryFloorK}K 的薪资档。
-- 搜索结果行过滤次数（包含跨关键词重复）：薪资低于下限 ${excludedHits['salary-below-min'] ?? 0}，薪资下限超过上限 ${excludedHits['salary-above-max'] ?? 0}，薪资无法解析 ${excludedHits['salary-unparsed'] ?? 0}，最低经验超过上限 ${excludedHits['experience-above-max'] ?? 0}。
+- 搜索接口返回：${totalRaw} 条结果行；对历史保留的搜索职位按最新薪资/经验规则重新筛选后有 ${retainedRows} 条范围内命中，职位 ID 去重后剩 ${jobs.length} 个目标职位、${companies.length} 个列表公司名称。
+- 范围规则：职位标示薪资区间需完整落在 ${minSalaryK}–${maxSalaryK}K；经验区间的上限不得超过 ${maxExperienceYears} 年。像“5–10年”或“30–60K”这样的职位会整体排除。详情采集器会再次应用相同规则，避免请求越界职位详情。
+- OpenCLI 当前只暴露 20–30K、30–50K 等离散薪资档，没有 30–40K 档；为覆盖 30–40K 岗位仍会查询 30–50K，超过 40K 的列表结果只在内存中过滤，不保存为岗位记录、不进入详情请求。
+- 历史保留搜索行的过滤次数（包含跨关键词重复）：薪资低于下限 ${excludedHits['salary-below-min'] ?? 0}，薪资区间上限超过 ${maxSalaryK}K ${excludedHits['salary-above-max'] ?? 0}，薪资无法解析 ${excludedHits['salary-unparsed'] ?? 0}，经验区间上限超过 ${maxExperienceYears} 年 ${excludedHits['experience-above-max'] ?? 0}；明确外包/猎头线索另行排除。
 - 已读取搜索页：${pagesScanned.length ? pagesScanned.join('、') : '无'}；${paginationSummary ? `分页器状态：${paginationSummary.complete ? '按空页/重复页规则结束' : `未穷尽（页数上限 ${paginationSummary.lastPage}，${paginationSummary.cappedSlices} 个筛选组合触顶）`}` : '该快照没有分页穷尽状态记录'}。
-- 范围内职位：${eligibleJobs.length} 个；详情描述已采集 ${detailCount} 个，覆盖 ${detailCount}/${eligibleJobs.length}。
+- 范围内职位：${eligibleJobs.length} 个；详情描述已采集 ${detailCount} 个，覆盖 ${detailCount}/${eligibleJobs.length}。另有 ${scopeExcludedUnique} 个历史已落盘唯一职位不符合新薪资/经验条件，明细见 [\`scope-excluded-postings.csv\`](./scope-excluded-postings.csv)。
 - 详情仅有短摘要：${shortCount} 个；详情文本包含明确“任职/岗位/工作要求”段落：${requirementCount} 个。
-- 详情未恢复：${missingEligible.length} 个；按职位列表/详情数据核验后有 ${outOfScopeUnique} 个唯一职位不符合当前薪资或经验范围，不纳入职位与详情索引。
-- 公司有“客户公司”或人力资源服务资质证据、列为排除复核候选：${screeningCandidates.length} 个。原始行仍保留；该筛选提示是依据页面证据作出的分析判断，不等于已核验用工关系。
+- 详情未恢复：${missingEligible.length} 个；另有 ${excludedEmployerJobs.length} 个唯一职位因明确公司名/岗位标题外包猎头线索从目标索引排除，详见 [\`excluded-postings.csv\`](./excluded-postings.csv)。
+- 仍需人工核验招聘主体/客户关系的公司候选：${screeningCandidates.length} 个；不因“客户公司”字样单独判定外包。明确排除的岗位及原因见 [\`excluded-postings.csv\`](./excluded-postings.csv)。
 
 ## 高频要求关键词
 
@@ -336,38 +351,40 @@ ${termCounts.map(({ term, count }) => `| ${term} | ${count} |`).join('\n')}
 
 ## 公司筛选提示
 
-- “客户公司”字段与“人力资源服务许可证”来自职位详情页；二者同时出现的职位标为“排除候选，待核实”。
-- 名称里出现外包、猎头、人力资源、劳务派遣等词只列为核验线索；不据此单独断言公司性质。
+- “客户公司”字段与“人力资源服务许可证”来自职位详情页；二者同时出现的职位标为“排除候选，待核实”，单独出现时不自动排除。
+- 明确公司名/岗位标题命中德科、猎头、外包、劳务派遣、人力资源服务或人才服务等线索的岗位不进入目标职位/详情索引；命中依据和来源 ID 列在排除表中。
 - 匿名公司名、招聘主体、实际用工关系与企业公开业务信息仍需核实。公司原始字段和职位链接见 [\`companies-index.csv\`](./companies-index.csv)。
 
 ## 数据文件
 
-- [\`positions-index.csv\`](./positions-index.csv)：所有搜索列表职位、薪资初筛和详情状态。
-- [\`job-details.csv\`](./job-details.csv)：符合列表薪资初筛的职位详情、完整职责/要求文本、公司字段、来源和筛选证据。
+- [\`positions-index.csv\`](./positions-index.csv)：符合薪资/经验条件的去重职位索引、薪资区间、经验区间和详情状态。
+- [\`job-details.csv\`](./job-details.csv)：符合薪资/经验条件的职位详情、完整职责/要求文本、公司字段、来源和筛选证据。
 - [\`companies-index.csv\`](./companies-index.csv)：按列表公司名汇总职位、详情公司信息和筛选线索。
+- [\`excluded-postings.csv\`](./excluded-postings.csv)：按用户筛选规则排除的德科/外包/猎头岗位名录及命中原因。
+- [\`scope-excluded-postings.csv\`](./scope-excluded-postings.csv)：历史保留记录中不符合薪资/经验上限的岗位及具体命中原因，不进入详情续采队列。
 - [\`raw/\`](../raw/)：只追加的 OpenCLI JSONL 搜索/详情原始记录和本地 trace 恢复记录。
 
 ## 未完成
 
-- ${missingEligible.length ? `尚有 ${missingEligible.length} 个列表薪资初筛通过的职位详情未恢复；` : '列表薪资初筛职位均已有详情文本；'}短摘要岗位不含完整任职要求，需要人工查看或后续补充。
-- 公司是否为外包、猎头或客户代招需基于招聘主体与用工关系进一步核验。
+- ${missingEligible.length ? `尚有 ${missingEligible.length} 个薪资/经验符合条件的职位详情未恢复；` : '薪资/经验符合条件的职位均已有详情文本；'}短摘要岗位不含完整任职要求，需要人工查看或后续补充。
+- 公司是否为客户代招或存在不在名称/资质字段中的外包关系仍需进一步核验。
 - 个人匹配分析、公司公开信息研究和最终投递优先级尚未完成。
 
 ## 更新记录
 
-- 2026-11-27：修复 OpenCLI 空白页采集链路；完成详情解析回退、脱敏和职位/公司数据索引；新增要求关键词初步统计。
+- 2026-11-27：按用户最新口径改为月薪完整区间 20–40K、经验上限不超过 5 年；历史索引已重新筛选，并新增范围外岗位明细。
 `;
 await writeFile(path.join(outDir, 'requirements-summary.md'), report, 'utf8');
 const searchReport = `# 深圳 Java 后端与 AI Agent 岗位：搜索索引
 
 > 采集日期：${searchDate} 至 2026-11-27  
 > 数据源：Boss 直聘搜索切片，经本机 OpenCLI 读取。  
-> 状态：列表索引按职位 ID 幂等去重，并应用薪资/经验过滤；职位要求统计见 [\`requirements-summary.md\`](./requirements-summary.md)。
+> 状态：列表索引按职位 ID 幂等去重，并应用完整薪资/经验区间过滤；职位要求统计见 [\`requirements-summary.md\`](./requirements-summary.md)。
 
 - 搜索结果行：${totalRaw} 条；范围内 ${retainedRows} 条，去重后 ${jobs.length} 个职位、${companies.length} 个列表公司名。
-- 筛选：薪资下限 ${minSalaryFloorK}–${maxSalaryFloorK}K，最低经验要求不超过 ${maxExperienceYears} 年。
+- 筛选：月薪完整区间 ${minSalaryK}–${maxSalaryK}K，经验区间上限不超过 ${maxExperienceYears} 年。
 - 已读取页码：${pagesScanned.length ? pagesScanned.join('、') : '无'}；${paginationSummary ? `分页状态：${paginationSummary.complete ? '按终止规则结束' : `未穷尽，${paginationSummary.cappedSlices} 个筛选组合触及页数上限`}` : '无分页终止记录'}。
-- 列表薪资初筛至少 20K：${eligibleJobs.length} 个职位；已获得详情文本 ${detailCount} 个，另有 ${missingEligible.length} 个待核实。
+- 薪资/经验符合条件：${eligibleJobs.length} 个职位；已获得详情文本 ${detailCount} 个，另有 ${missingEligible.length} 个待核实。
 - 职位列表见 [\`positions-index.csv\`](./positions-index.csv)；详情全文和公司页面字段见 [\`job-details.csv\`](./job-details.csv)；公司汇总见 [\`companies-index.csv\`](./companies-index.csv)。
 - 原始 JSONL 与来源记录见 [\`raw/\`](../raw/)。
 
@@ -379,5 +396,6 @@ process.stdout.write(`${JSON.stringify({
   inputFile: path.relative(projectRoot, inputFile), rawRows: totalRaw, uniqueJobs: jobs.length, companies: companies.length,
   salaryEligibleJobs: eligibleJobs.length, detailsFound: detailCount, requirementsProvided: requirementCount, shortSummaries: shortCount,
   missingEligible: missingEligible.length, duplicateDetailRows: detailRows - detailsById.size, screeningCandidates: screeningCandidates.length,
-  output: ['out/positions-index.csv', 'out/job-details.csv', 'out/companies-index.csv', 'out/requirements-summary.md', 'out/search-index.md'],
+  scopeExcludedUnique,
+  output: ['out/positions-index.csv', 'out/job-details.csv', 'out/companies-index.csv', 'out/excluded-postings.csv', 'out/scope-excluded-postings.csv', 'out/requirements-summary.md', 'out/search-index.md'],
 })}\n`);

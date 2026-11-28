@@ -8,6 +8,8 @@ import { appendFile, mkdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { employerExclusionReason } from './screening.mjs';
+import { DEFAULT_SCOPE, scopeExclusionReason } from './scope.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(here, '..');
@@ -39,11 +41,12 @@ const page = Number(one('page', '1'));
 const maxPages = Number(one('max-pages', '1'));
 const limit = Number(one('limit', '10'));
 const concurrency = Number(one('concurrency', '2'));
-const intervalMs = Number(one('interval-ms', '15000'));
-const staggerMs = Number(one('stagger-ms', '5000'));
-const minSalaryFloorK = Number(one('min-salary-k', '20'));
-const maxSalaryFloorK = Number(one('max-salary-k', '40'));
-const maxExperienceYears = Number(one('max-experience-years', '5'));
+const intervalMs = Number(one('interval-ms', '60000'));
+const staggerMs = Number(one('stagger-ms', '10000'));
+const minSalaryK = Number(one('min-salary-k', String(DEFAULT_SCOPE.minSalaryK)));
+const maxSalaryK = Number(one('max-salary-k', String(DEFAULT_SCOPE.maxSalaryK)));
+const maxExperienceYears = Number(one('max-experience-years', String(DEFAULT_SCOPE.maxExperienceYears)));
+const scope = { minSalaryK, maxSalaryK, maxExperienceYears };
 const outDir = path.resolve(one('out-dir', defaultOutDir));
 const resumeFile = one('resume', '');
 
@@ -53,7 +56,7 @@ if (!Number.isInteger(limit) || limit < 1 || limit > 15) throw new Error('--limi
 if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 2) throw new Error('--concurrency must be 1 or 2');
 if (!Number.isInteger(intervalMs) || intervalMs < 10000 || intervalMs > 120000) throw new Error('--interval-ms must be between 10000 and 120000');
 if (!Number.isInteger(staggerMs) || staggerMs < 0 || staggerMs > 30000) throw new Error('--stagger-ms must be between 0 and 30000');
-if (!Number.isFinite(minSalaryFloorK) || !Number.isFinite(maxSalaryFloorK) || minSalaryFloorK > maxSalaryFloorK) throw new Error('Invalid salary floor range');
+if (!Number.isFinite(minSalaryK) || !Number.isFinite(maxSalaryK) || minSalaryK > maxSalaryK) throw new Error('Invalid salary range');
 if (!Number.isFinite(maxExperienceYears) || maxExperienceYears < 0) throw new Error('--max-experience-years must be a non-negative number');
 
 function timestamp() {
@@ -131,35 +134,9 @@ function cleanRow(row) {
   };
 }
 
-function salaryFloorK(salary) {
-  if (typeof salary !== 'string') return null;
-  const range = salary.match(/(\d+(?:\.\d+)?)\s*-\s*\d+(?:\.\d+)?\s*K/i);
-  if (range) return Number(range[1]);
-  const single = salary.match(/(\d+(?:\.\d+)?)\s*K(?:以上|\+)?/i);
-  return single ? Number(single[1]) : null;
-}
-
-function experienceMinimumYears(experience) {
-  const value = String(experience ?? '').trim();
-  if (!value) return null;
-  if (/不限|应届|在校|实习|无经验/.test(value)) return 0;
-  if (/\d+(?:\.\d+)?\s*年\s*(?:以内|以下)/.test(value)) return 0;
-  const range = value.match(/(\d+(?:\.\d+)?)\s*(?:-|~|～|至)\s*\d+(?:\.\d+)?\s*年/);
-  if (range) return Number(range[1]);
-  const minimum = value.match(/(\d+(?:\.\d+)?)\s*年\s*(?:以上|及以上|\+)/);
-  if (minimum) return Number(minimum[1]);
-  const single = value.match(/(\d+(?:\.\d+)?)\s*年/);
-  return single ? Number(single[1]) : null;
-}
-
 function exclusionReason(row) {
-  const salaryFloor = salaryFloorK(row.salary);
-  if (salaryFloor === null) return 'salary-unparsed';
-  if (salaryFloor < minSalaryFloorK) return 'salary-below-min';
-  if (salaryFloor > maxSalaryFloorK) return 'salary-above-max';
-  const experienceMinimum = experienceMinimumYears(row.experience);
-  if (experienceMinimum !== null && experienceMinimum > maxExperienceYears) return 'experience-above-max';
-  return null;
+  if (employerExclusionReason(row)) return 'agency-or-outsourcing';
+  return scopeExclusionReason(row, scope);
 }
 
 function sliceKey(query, salaryBucket) {
@@ -225,6 +202,57 @@ function runOpenCli(args) {
   });
 }
 
+async function classifySearchFailure(error) {
+  const summaryPath = String(error?.message ?? '').match(/trace=(.+?summary\.md)(?:\s|$)/)?.[1];
+  if (!summaryPath) return null;
+  try {
+    const summary = await readFile(summaryPath, 'utf8');
+    const tracePath = path.join(path.dirname(summaryPath), 'trace.jsonl');
+    const traceLines = (await readFile(tracePath, 'utf8')).split(/\r?\n/).filter(Boolean);
+    const events = traceLines.map((line) => JSON.parse(line));
+    const finalState = events.filter((event) => event.stream === 'state').at(-1);
+    const stateUrl = String(finalState?.url ?? '');
+    const combined = `${summary}\n${traceLines.join('\n')}`;
+    const protectedPage = /验证码|安全验证|访问过于频繁|行为验证|captcha|verification|too many requests|rate limit/i.test(combined);
+    if (protectedPage) return null;
+    // state/0001.json may be captured after owned-tab cleanup. The trace
+    // timeline records the page URL observed before cleanup.
+    if (stateUrl === 'about:blank') return 'blank-navigation';
+    if (stateUrl.startsWith('https://www.zhipin.com/web/geek/jobs?') &&
+        /BOSS search page did not expose its job-list response/.test(String(error?.message ?? '')) &&
+        /## Failed Network\s*\n\s*- none/.test(summary)) {
+      return 'missing-joblist-response';
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function restartOpenCliDaemon() {
+  return new Promise((resolve, reject) => {
+    const child = spawn('opencli', ['daemon', 'restart'], { stdio: ['ignore', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.setEncoding('utf8').on('data', (chunk) => { stdout += chunk; });
+    child.stderr.setEncoding('utf8').on('data', (chunk) => { stderr += chunk; });
+    child.once('error', reject);
+    child.once('close', (code) => {
+      if (code !== 0) {
+        reject(new Error(`opencli daemon restart failed: ${stderr.trim().slice(-300)}`));
+        return;
+      }
+      try {
+        const payload = JSON.parse(stdout.trim());
+        if (payload?.ok && payload?.data?.status?.ok) resolve(payload.data.status);
+        else reject(new Error('opencli daemon restart did not report a healthy status'));
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+}
+
 async function assertOwnedTabCleanupSupport() {
   const versionText = await runOpenCli(['--version']);
   const match = versionText.match(/\b(\d+)\.(\d+)\.(\d+)\b/);
@@ -243,13 +271,16 @@ let seenBySlice = new Map();
 let emptyPageStreakBySlice = new Map();
 let exhaustedSlices = new Set();
 let terminalReasonBySlice = new Map();
+let deferredSlices = new Map();
 let totalRows = 0;
 
 if (resumeFile) {
   const priorLines = (await readFile(outFile, 'utf8')).split(/\r?\n/).filter(Boolean).map(JSON.parse);
   const manifest = priorLines.find((record) => record.type === 'manifest');
   if (!manifest) throw new Error('--resume file has no collection manifest');
-  const expected = { city, startPage: page, maxPages, limit, queries, salaryBuckets, minSalaryFloorK, maxSalaryFloorK, maxExperienceYears, staggerMs, intervalMs, concurrency };
+  // Scope rules only filter returned rows; they do not change the remote search request.
+  // Allow an idempotent resume across a stricter client-side filter revision.
+  const expected = { city, startPage: page, maxPages, limit, queries, salaryBuckets };
   if (manifest.startPage === undefined) manifest.startPage = manifest.page ?? 1;
   if (manifest.maxPages === undefined) manifest.maxPages = 1;
   for (const key of Object.keys(expected)) {
@@ -281,9 +312,9 @@ if (resumeFile) {
     page,
     startPage: page,
     maxPages,
-    filters: { minSalaryFloorK, maxSalaryFloorK, maxExperienceYears, experienceMeaning: 'exclude only when the minimum required experience is greater than the configured maximum' },
-    minSalaryFloorK,
-    maxSalaryFloorK,
+    filters: { ...scope, salaryMeaning: 'keep only when the entire displayed range is within the configured bounds', experienceMeaning: 'exclude when the displayed upper bound exceeds the configured maximum' },
+    minSalaryK,
+    maxSalaryK,
     maxExperienceYears,
     paginationRule: 'Stop each query/salary slice after an empty page or two consecutive pages with no unseen job IDs; maxPages is a hard cap.',
     limit,
@@ -304,14 +335,61 @@ function appendRecord(record) {
   return writeQueue;
 }
 
-const pending = tasks.filter((task) => !completedKeys.has(taskKey(task.query, task.salaryBucket)));
+if (resumeFile) {
+  await appendRecord({ type: 'resume', resumedAt: new Date().toISOString(), concurrency, intervalMs, staggerMs });
+}
+
 let completedSlices = completedKeys.size;
 let stop = false;
 const lastPage = page + maxPages - 1;
+
+async function persistSlice(query, salaryBucket, currentPage, sliceTime, payload, recovery = null) {
+  const responseRows = resultRows(payload).map(cleanRow);
+  const rows = responseRows.filter((row) => exclusionReason(row) === null);
+  const excluded = responseRows.reduce((counts, row) => {
+    const reason = exclusionReason(row);
+    if (reason) counts[reason] = (counts[reason] ?? 0) + 1;
+    return counts;
+  }, {});
+  const perSliceKey = sliceKey(query, salaryBucket);
+  const seen = seenBySlice.get(perSliceKey) ?? new Set();
+  const newResultCount = responseRows.filter((row) => !seen.has(jobKey(row))).length;
+  const pageKeys = responseRows.map((row) => jobKey(row));
+  for (const keyValue of pageKeys) seen.add(keyValue);
+  seenBySlice.set(perSliceKey, seen);
+  const emptyPageStreak = responseRows.length === 0
+    ? 2
+    : newResultCount === 0
+      ? (emptyPageStreakBySlice.get(perSliceKey) ?? 0) + 1
+      : 0;
+  emptyPageStreakBySlice.set(perSliceKey, emptyPageStreak);
+  const stopReason = responseRows.length === 0 ? 'empty-page' : emptyPageStreak >= 2 ? 'two-pages-without-new-jobs' : currentPage === lastPage ? 'max-pages' : null;
+  const exhausted = stopReason !== null;
+  await appendRecord({
+    type: 'slice', collectedAt: sliceTime, query, salaryBucket, page: currentPage,
+    responseCount: responseRows.length, count: rows.length, newCount: newResultCount, excluded, pageKeys,
+    emptyPageStreak, exhausted, stopReason, ...(recovery ? { recovery } : {}), rows,
+  });
+  completedKeys.add(taskKey(query, salaryBucket, currentPage));
+  if (exhausted) {
+    exhaustedSlices.add(perSliceKey);
+    terminalReasonBySlice.set(perSliceKey, stopReason);
+  }
+  completedSlices += 1;
+  totalRows += rows.length;
+  const summary = { query, salaryBucket, page: currentPage, responseCount: responseRows.length, kept: rows.length, excluded, newCount: newResultCount, stopReason, completedSlices, totalRows, output: path.basename(outFile) };
+  process.stdout.write(`${JSON.stringify(recovery ? { ...summary, recovery } : summary)}\n`);
+  return summary;
+}
+
 for (let currentPage = page; currentPage <= lastPage && !stop; currentPage += 1) {
   if (exhaustedSlices.size === tasks.length) break;
   const pending = tasks.filter(({ query, salaryBucket }) =>
-    !exhaustedSlices.has(sliceKey(query, salaryBucket)) && !completedKeys.has(taskKey(query, salaryBucket, currentPage)));
+    !exhaustedSlices.has(sliceKey(query, salaryBucket)) && !deferredSlices.has(sliceKey(query, salaryBucket)) &&
+    !completedKeys.has(taskKey(query, salaryBucket, currentPage)));
+  // A resumed run may scan many already-completed pages before reaching its
+  // checkpoint. Do not spend the network-request interval on a local-only skip.
+  if (pending.length === 0) continue;
   for (let offset = 0; offset < pending.length && !stop; offset += concurrency) {
     const batch = pending.slice(offset, offset + concurrency);
     const results = await Promise.all(batch.map(async ({ query, salaryBucket }, batchIndex) => {
@@ -331,51 +409,69 @@ for (let currentPage = page; currentPage <= lastPage && !stop; currentPage += 1)
       ];
       try {
         const payload = parseJsonOutput(await runOpenCli(cliArgs));
-        const responseRows = resultRows(payload).map(cleanRow);
-        const rows = responseRows.filter((row) => exclusionReason(row) === null);
-        const excluded = responseRows.reduce((counts, row) => {
-          const reason = exclusionReason(row);
-          if (reason) counts[reason] = (counts[reason] ?? 0) + 1;
-          return counts;
-        }, {});
-        const perSliceKey = sliceKey(query, salaryBucket);
-        const seen = seenBySlice.get(perSliceKey) ?? new Set();
-        const newResultCount = responseRows.filter((row) => !seen.has(jobKey(row))).length;
-        const pageKeys = responseRows.map((row) => jobKey(row));
-        for (const keyValue of pageKeys) seen.add(keyValue);
-        seenBySlice.set(perSliceKey, seen);
-        const emptyPageStreak = responseRows.length === 0
-          ? 2
-          : newResultCount === 0
-            ? (emptyPageStreakBySlice.get(perSliceKey) ?? 0) + 1
-            : 0;
-        emptyPageStreakBySlice.set(perSliceKey, emptyPageStreak);
-        const stopReason = responseRows.length === 0 ? 'empty-page' : emptyPageStreak >= 2 ? 'two-pages-without-new-jobs' : currentPage === lastPage ? 'max-pages' : null;
-        const exhausted = stopReason !== null;
-        await appendRecord({
-          type: 'slice', collectedAt: sliceTime, query, salaryBucket, page: currentPage,
-          responseCount: responseRows.length, count: rows.length, newCount: newResultCount, excluded, pageKeys,
-          emptyPageStreak, exhausted, stopReason, rows,
-        });
-        completedKeys.add(taskKey(query, salaryBucket, currentPage));
-        if (exhausted) {
-          exhaustedSlices.add(perSliceKey);
-          terminalReasonBySlice.set(perSliceKey, stopReason);
-        }
-        completedSlices += 1;
-        totalRows += rows.length;
-        process.stdout.write(`${JSON.stringify({ query, salaryBucket, page: currentPage, responseCount: responseRows.length, kept: rows.length, excluded, newCount: newResultCount, stopReason, completedSlices, totalRows, output: path.basename(outFile) })}\n`);
-        return { ok: true };
+        return { ok: true, task: { query, salaryBucket }, cliArgs, sliceTime, summary: await persistSlice(query, salaryBucket, currentPage, sliceTime, payload) };
       } catch (error) {
-        await appendRecord({ type: 'error', collectedAt: sliceTime, query, salaryBucket, page: currentPage, message: error.message });
+        await appendRecord({ type: 'error', collectedAt: sliceTime, query, salaryBucket, page: currentPage, attempt: 1, message: error.message });
         process.stderr.write(`Failed query=${query}, salary=${salaryBucket}, page=${currentPage}: ${error.message}\n`);
-        return { ok: false };
+        const recoveryKind = await classifySearchFailure(error);
+        return { ok: false, recoveryKind, task: { query, salaryBucket }, cliArgs, sliceTime, error };
       }
     }));
+    for (const result of results.filter((item) => !item.ok && item.recoveryKind)) {
+      const maxRecoveryAttempts = result.recoveryKind === 'blank-navigation' ? 2 : 1;
+      for (let recoveryAttempt = 1; recoveryAttempt <= maxRecoveryAttempts; recoveryAttempt += 1) {
+        try {
+          const shouldRestartDaemon = result.recoveryKind === 'blank-navigation';
+          process.stderr.write(`${result.recoveryKind} trace confirmed for ${result.task.query}/${result.task.salaryBucket}; recovery ${recoveryAttempt}/${maxRecoveryAttempts}: waiting ${intervalMs}ms${shouldRestartDaemon ? ', restarting OpenCLI daemon' : ''}, then retrying.\n`);
+          await new Promise((resolve) => setTimeout(resolve, intervalMs));
+          if (shouldRestartDaemon) {
+            await restartOpenCliDaemon();
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+          }
+          const retryTime = new Date().toISOString();
+          const payload = parseJsonOutput(await runOpenCli(result.cliArgs));
+          const recoveryLabel = shouldRestartDaemon
+            ? `daemon-restart-after-blank-navigation-${recoveryAttempt}`
+            : `retry-after-missing-joblist-response-${recoveryAttempt}`;
+          result.summary = await persistSlice(result.task.query, result.task.salaryBucket, currentPage, retryTime, payload, recoveryLabel);
+          result.ok = true;
+          break;
+        } catch (retryError) {
+          result.error = retryError;
+          const retryKindAgain = await classifySearchFailure(retryError);
+          await appendRecord({
+            type: 'error', collectedAt: new Date().toISOString(), query: result.task.query,
+            salaryBucket: result.task.salaryBucket, page: currentPage, attempt: recoveryAttempt + 1,
+            recovery: `${result.recoveryKind}-${recoveryAttempt}`, message: retryError.message,
+          });
+          if (recoveryAttempt === maxRecoveryAttempts || !retryKindAgain || retryKindAgain !== result.recoveryKind) {
+            result.ok = false;
+            process.stderr.write(`Recovery failed query=${result.task.query}, salary=${result.task.salaryBucket}, page=${currentPage}: ${retryError.message}\n`);
+            break;
+          }
+          process.stderr.write(`Recovery ${recoveryAttempt} still ended on the same classified failure; will wait before the final recovery attempt.\n`);
+        }
+      }
+    }
     if (results.some((result) => !result.ok)) {
-      stop = true;
-      process.stderr.write(`Stopped after the current batch. Partial output saved: ${outFile} (${completedSlices} slices, ${totalRows} rows). Resume with --resume "${outFile}" after reviewing the error.\n`);
-      process.exitCode = 1;
+      const failedResults = results.filter((result) => !result.ok);
+      const fatalFailure = failedResults.find((result) =>
+        result.recoveryKind !== 'missing-joblist-response' ||
+        /BROWSER_CONNECT|AUTH_REQUIRED|captcha|verification|验证码|安全验证|访问过于频繁|rate limit|too many requests/i.test(String(result.error?.message ?? '')));
+      if (fatalFailure) {
+        stop = true;
+        process.stderr.write(`Stopped after the current batch. Partial output saved: ${outFile} (${completedSlices} slices, ${totalRows} rows). Resume with --resume "${outFile}" after reviewing the error.\n`);
+        process.exitCode = 1;
+      } else {
+        for (const result of failedResults) {
+          const key = sliceKey(result.task.query, result.task.salaryBucket);
+          const deferred = { query: result.task.query, salaryBucket: result.task.salaryBucket, page: currentPage, reason: 'missing-joblist-response-after-retry', message: result.error?.message ?? '' };
+          deferredSlices.set(key, deferred);
+          await appendRecord({ type: 'deferred-slice', collectedAt: new Date().toISOString(), ...deferred });
+          process.stderr.write(`Deferred ${result.task.query}/${result.task.salaryBucket} at page ${currentPage}; continuing with other search slices.\n`);
+        }
+        if (offset + concurrency < pending.length) await new Promise((resolve) => setTimeout(resolve, intervalMs));
+      }
     } else if (offset + concurrency < pending.length) {
       await new Promise((resolve) => setTimeout(resolve, intervalMs));
     }
@@ -387,7 +483,8 @@ for (let currentPage = page; currentPage <= lastPage && !stop; currentPage += 1)
 if (!stop) {
   const cappedSlices = [...terminalReasonBySlice.values()].filter((reason) => reason === 'max-pages').length;
   const exhaustedCount = exhaustedSlices.size;
-  const complete = exhaustedCount === tasks.length && cappedSlices === 0;
-  await appendRecord({ type: 'pagination-summary', completedAt: new Date().toISOString(), complete, startPage: page, lastPage, maxPages, slices: tasks.length, exhaustedSlices: exhaustedCount, cappedSlices, terminalReasons: Object.fromEntries(terminalReasonBySlice) });
-  process.stdout.write(`${JSON.stringify({ complete, completedSlices, totalRows, exhaustedSlices: exhaustedCount, cappedSlices, lastPage, output: outFile })}\n`);
+  const complete = exhaustedCount === tasks.length && cappedSlices === 0 && deferredSlices.size === 0;
+  await appendRecord({ type: 'pagination-summary', completedAt: new Date().toISOString(), complete, startPage: page, lastPage, maxPages, slices: tasks.length, exhaustedSlices: exhaustedCount, cappedSlices, deferredSlices: [...deferredSlices.values()], terminalReasons: Object.fromEntries(terminalReasonBySlice), runSettings: { concurrency, intervalMs, staggerMs } });
+  process.stdout.write(`${JSON.stringify({ complete, completedSlices, totalRows, exhaustedSlices: exhaustedCount, cappedSlices, deferredSlices: deferredSlices.size, lastPage, output: outFile })}\n`);
+  if (deferredSlices.size > 0) process.exitCode = 1;
 }
