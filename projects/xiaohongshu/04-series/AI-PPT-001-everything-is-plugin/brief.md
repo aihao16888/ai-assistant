@@ -1,10 +1,11 @@
 # AI-PPT-001｜DeepSeek Harness：Everything is a Plugin
 
-- 状态：阶段 A 问题地图、阶段 B Cordis Runtime/Loader 源码与测试静态审查均已完成；阶段 C 真实产品插件案例待执行
+- 状态：阶段 A、B 已完成；阶段 C 的 C1 候选比较已完成，推荐 Bash 能力 seam；C2 待用户确认
 - 所属专题：[AI 做 PPT 专题研究](../../01-research/ai-ppt-series.md)
 - 技术资料：[DeepSeek Harness 文档目录](../../../../docs/deepseek-harness/README.md)
 - 研究地图：[阶段 A 问题地图](./00-stage-a-research-map.md)
 - 阶段 B 成果：[Cordis Runtime 与 Loader 研究笔记](./03-research-notes.md)
+- 阶段 C C1 候选比较：[真实产品插件案例追踪](./04-source-trace.md)
 - 第一阶段计划：[研究计划](./01-stage-one-research-plan.md) · [AI Agent 研究任务书](./02-first-round-agent-task.md)
 - 关联项目：[小红书运营项目](../../README.md)
 - 创建日期：2026-11-28
@@ -307,7 +308,7 @@ HTML 原型通过审核后，再根据已确认的页面结构和视觉规范制
 - 完成 PPT 大纲、HTML 原型和 Office PPTX；
 - 根据真实过程筛选和制作小红书笔记。
 
-**下一步只做一件事：** 建立 Everything is a Plugin 的官方资料和源码阅读范围，选出一个真实插件，先把插件加载、依赖、生命周期和能力注册的实现过程研究清楚。研究结论通过核验后，再确定最终 PPT 页数和内容。
+**C1 已完成：** 已比较 Bash 能力 seam、LLM Provider Adapter 和 Agent Loop，推荐 Bash 能力 seam，比较依据见 [04-source-trace.md](./04-source-trace.md)。**下一步：** 等用户确认后，进入 C2，追踪 Base Bundle 实际挂载的 dsh-bash-sandbox 与 dsh-tool-bash 的完整调用链；不提前制作 PPT。
 
 ## 更新记录
 
@@ -317,11 +318,13 @@ HTML 原型通过审核后，再根据已确认的页面结构和视觉规范制
 
 ## 9. 研究阶段状态
 
+注意：本节 A–E 是知识研究阶段；第 5 节中的 PPT 制作阶段 A/B/C 是另一套流程，两者不要混用。
+
 | 阶段 | 状态 | 说明 |
 |---|---|---|
 | A 问题地图 | 已完成 | [00-stage-a-research-map.md](./00-stage-a-research-map.md) |
 | B Runtime 机制 | 已完成（静态审查） | [03-research-notes.md](./03-research-notes.md)；读取源码和测试，未运行本地测试 |
-| C 真实插件案例 | 待执行 | 比较 Bash、LLM Adapter、Agent Loop 后选择一个主案例 |
+| C 真实插件案例 | 进行中（C1 完成，C2 待确认） | [04-source-trace.md](./04-source-trace.md)；推荐 Bash 能力 seam |
 | D 价值与代价 | 待执行 | 基于 B/C 证据分析，不预先写结论 |
 | E 知识验收 | 待执行 | 反向讲解、架构图和问答验收 |
 
@@ -347,3 +350,4 @@ HTML 原型通过审核后，再根据已确认的页面结构和视觉规范制
 ## 更新记录
 
 - 2026-11-28：完成阶段 B 源码与测试静态审查；更新研究状态，进入真实产品插件案例选择阶段。
+- 2026-11-28：完成阶段 C1 候选比较，推荐 Bash 能力 seam；C2 等待用户确认。
