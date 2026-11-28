@@ -5,7 +5,7 @@
 - 阶段 A 成果：[研究问题地图](./00-stage-a-research-map.md)
 - 阶段 B 成果：[Cordis Runtime 与 Loader 研究笔记](./03-research-notes.md)
 - Agent 任务书：[02-first-round-agent-task.md](./02-first-round-agent-task.md)
-- 当前状态：**阶段 A、B 已完成；下一步进入阶段 C**
+- 当前状态：**阶段 A、B 已完成；阶段 C 进行中（C1 候选比较完成，推荐 Bash 能力 seam，C2 待用户确认）**
 
 ---
 
@@ -83,7 +83,7 @@ HTML 原型 → 审核 → 原生可编辑 PPTX
 
 ### 阶段 C｜追踪一个真实产品插件/能力 seam
 
-**状态：待执行**
+**状态：进行中（C1 候选比较已完成；C2 等待用户确认）**
 
 目标：将 Cordis 抽象与 DeepSeek Harness 的真实产品实现连接起来。
 
@@ -99,6 +99,8 @@ HTML 原型 → 审核 → 原生可编辑 PPTX
 - 有对应测试；
 - 能讲清加载、依赖、提供能力和卸载；
 - 不需要真实 API Key 或外部服务才能理解核心链路。
+
+C1 候选比较已完成，结果记录在 [04-source-trace.md](./04-source-trace.md)。当前推荐 Bash 能力 seam：以 Base Bundle 实际挂载的 dsh-bash-sandbox 为主线，以 dsh-bash-local 作为替换对照；尚未开始 C2，等待用户确认。
 
 产出：
 - 04-source-trace.md；
@@ -186,11 +188,12 @@ Cordis 的上游来源和 Harness 本地修改见固定版本中的 vendor/READM
 |---|---|---|
 | A 问题地图 | 已完成 | 00-stage-a-research-map.md |
 | B Runtime 机制 | 已完成（静态审查） | 03-research-notes.md |
-| C 真实插件案例 | 待执行 | 候选待比较 |
+| C 真实插件案例 | 进行中（C1 完成，C2 待确认） | [04-source-trace.md](./04-source-trace.md)；推荐 Bash 能力 seam |
 | D 价值与代价 | 待执行 | 等待 C 的产品证据 |
 | E 知识验收 | 待执行 | 等待研究结论 |
 
 ## 更新记录
 
 - 2026-11-28：阶段 A 完成，建立问题地图。
-- 2026-11-28：阶段 B 完成源码与测试静态审查；未执行本地测试，保留运行边界 OPEN；下一步进入阶段 C。
+- 2026-11-28：阶段 B 完成源码与测试静态审查；未执行本地测试，保留运行边界 OPEN。
+- 2026-11-28：阶段 C 的 C1 候选比较完成；推荐 Bash 能力 seam，C2 待用户确认。
